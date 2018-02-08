@@ -1,3 +1,16 @@
+"""
+This is the provides side of the interface layer, for use only by the AWS
+integration charm itself.
+
+The flags that are set by the provides side of this interface are:
+
+* **`endpoint.{endpoint_name}.requested`** This flag is set when there is
+  a new or updated request by a remote unit for AWS integration features.
+  The AWS integration charm should then iterate over each request, perform
+  whatever actions are necessary to satisfy those requests, and then mark
+  them as complete.
+"""
+
 import json
 from hashlib import sha256
 
@@ -10,20 +23,22 @@ from charms.reactive import toggle_flag, clear_flag
 
 class AWSProvides(Endpoint):
     """
-    Example usage::
+    Example usage:
 
-        from charms.reactive import when, endpoint_from_flag
+    ```python
+    from charms.reactive import when, endpoint_from_flag
 
-        @when('endpoint.aws.requested')
-        def handle_requests():
-            aws = endpoint_from_flag('endpoint.aws.requested')
-            for request in aws.requests:
-                if request.instance_tags:
-                    tag_instance(request.instance_id, request.instance_tags)
-                if request.requested_elb:
-                    enable_elb(request.instance_id)
-                # ...
-                request.mark_completed()
+    @when('endpoint.aws.requested')
+    def handle_requests():
+        aws = endpoint_from_flag('endpoint.aws.requested')
+        for request in aws.requests:
+            if request.instance_tags:
+                tag_instance(request.instance_id, request.instance_tags)
+            if request.requested_elb:
+                enable_elb(request.instance_id)
+            # ...
+            request.mark_completed()
+    ```
     """
 
     @when('endpoint.{endpoint_name}.changed')
@@ -35,7 +50,7 @@ class AWSProvides(Endpoint):
     @property
     def requests(self):
         """
-        A list of the new or updated :class:`IntegrationRequests` that
+        A list of the new or updated #IntegrationRequests that
         have been made.
         """
         all_requests = [IntegrationRequest(unit)
@@ -95,7 +110,7 @@ class IntegrationRequest:
     @property
     def instance_tags(self):
         """
-        Mapping of tag names to values (or ``None``) to apply to this instance.
+        Mapping of tag names to values (or `None`) to apply to this instance.
         """
         # uses dict() here to make a copy, just to be safe
         return dict(self._unit.received.get('instance-tags', {}))
@@ -103,7 +118,7 @@ class IntegrationRequest:
     @property
     def security_group_tags(self):
         """
-        Mapping of tag names to values (or ``None``) to apply to all of this
+        Mapping of tag names to values (or `None`) to apply to all of this
         instance's security groups.
         """
         # uses dict() here to make a copy, just to be safe
@@ -112,7 +127,7 @@ class IntegrationRequest:
     @property
     def subnet_tags(self):
         """
-        Mapping of tag names to values (or ``None``) to apply to all of this
+        Mapping of tag names to values (or `None`) to apply to all of this
         instance's subnets.
         """
         # uses dict() here to make a copy, just to be safe

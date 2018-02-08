@@ -1,0 +1,12 @@
+site_name: 'AWS Integration Interface'
+
+generate:
+  - README.md:
+    - requires:
+      - requires.AWSRequires+
+    - provides:
+      - provides.AWSProvides+
+      - provides.IntegrationRequest+
+
+pages:
+  - README: README.md

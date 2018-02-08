@@ -1,0 +1,20 @@
+#!.tox/py3/bin/python
+
+import sys
+from pathlib import Path
+from shutil import rmtree
+from unittest.mock import patch
+
+import pydocmd.__main__
+
+
+with patch('charmhelpers.core.hookenv.metadata') as metadata:
+    metadata.return_value = {'requires': {'aws': {'interface': 'aws'}},
+                             'provides': {'aws': {'interface': 'aws'}}}
+    sys.path.insert(0, '.')
+    print(sys.argv)
+    if len(sys.argv) == 1:
+        sys.argv.extend(['build'])
+    pydocmd.__main__.main()
+    Path('_build/pydocmd/README.md').rename('./README.md')
+    rmtree('_build')
