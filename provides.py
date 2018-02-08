@@ -72,6 +72,8 @@ class IntegrationRequest:
         Whether this request has changed since the last time it was
         marked completed.
         """
+        if not self.instance_id:
+            return False
         saved_hash = unitdata.kv().get(self._hash_key)
         return saved_hash == self.hash
 
