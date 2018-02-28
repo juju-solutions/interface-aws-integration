@@ -90,15 +90,17 @@ class IntegrationRequest:
         if not self.instance_id:
             return False
         saved_hash = unitdata.kv().get(self._hash_key)
-        return saved_hash == self.hash
+        result = saved_hash != self.hash
+        return result
 
     def mark_completed(self):
         """
         Mark this request as having been completed.
         """
-        completed = self._unit.relation.to_publish.setdefault('completed', {})
+        completed = self._unit.relation.to_publish.get('completed', {})
         completed[self.instance_id] = self.hash
         unitdata.kv().set(self._hash_key, self.hash)
+        self._unit.relation.to_publish['completed'] = completed
 
     @property
     def instance_id(self):
