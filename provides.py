@@ -110,6 +110,13 @@ class IntegrationRequest:
         return self._unit.received['instance-id']
 
     @property
+    def region(self):
+        """
+        The region reported for this request.
+        """
+        return self._unit.received['region']
+
+    @property
     def instance_tags(self):
         """
         Mapping of tag names to values (or `None`) to apply to this instance.

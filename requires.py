@@ -20,7 +20,9 @@ The flags that are set by the requires side of this interface are:
 
 
 import json
+import string
 from hashlib import sha256
+from urllib.parse import urljoin
 from urllib.request import urlopen
 
 from charmhelpers.core import unitdata
@@ -28,6 +30,11 @@ from charmhelpers.core import unitdata
 from charms.reactive import Endpoint
 from charms.reactive import when
 from charms.reactive import set_flag, clear_flag
+
+
+# block size to read data from AWS metadata service
+# (realistically, just needs to be bigger than ~20 chars)
+READ_BLOCK_SIZE = 2048
 
 
 class AWSRequires(Endpoint):
@@ -52,7 +59,11 @@ class AWSRequires(Endpoint):
         update_config_enable_aws()
     ```
     """
-    _instance_id_url = 'http://169.254.169.254/latest/meta-data/instance-id'
+    # the IP is the AWS metadata service, documented here:
+    # https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-metadata.html
+    _metadata_url = 'http://169.254.169.254/latest/meta-data/'
+    _instance_id_url = urljoin(_metadata_url, 'instance-id')
+    _az_url = urljoin(_metadata_url, 'placement/availability-zone')
 
     @property
     def _received(self):
@@ -73,8 +84,9 @@ class AWSRequires(Endpoint):
         return self.relations[0].to_publish
 
     @when('endpoint.{endpoint_name}.joined')
-    def send_instance_id(self):
+    def send_instance_info(self):
         self._to_publish['instance-id'] = self.instance_id
+        self._to_publish['region'] = self.region
 
     @when('endpoint.{endpoint_name}.changed')
     def check_ready(self):
@@ -93,9 +105,23 @@ class AWSRequires(Endpoint):
                 self._instance_id = cached
             else:
                 with urlopen(self._instance_id_url) as fd:
-                    self._instance_id = fd.read(256).decode('utf8')
+                    self._instance_id = fd.read(READ_BLOCK_SIZE).decode('utf8')
                 unitdata.kv().set(cache_key, self._instance_id)
         return self._instance_id
+
+    @property
+    def region(self):
+        if not hasattr(self, '_region'):
+            cache_key = self.expand_name('region')
+            cached = unitdata.kv().get(cache_key)
+            if cached:
+                self._region = cached
+            else:
+                with urlopen(self._az_url) as fd:
+                    az = fd.read(READ_BLOCK_SIZE).decode('utf8')
+                    self._region = az.rstrip(string.ascii_lowercase)
+                unitdata.kv().set(cache_key, self._region)
+        return self._region
 
     @property
     def expected_hash(self):
