@@ -54,7 +54,7 @@ class AWSRequires(Endpoint):
         update_config_enable_aws()
     ```
     """
-    _metadata_url = 'http://instance-data/latest/meta-data/'
+    _metadata_url = 'http://169.254.169.254/latest/meta-data/'
     _instance_id_url = urljoin(_metadata_url, 'instance-id')
     _az_url = urljoin(_metadata_url, 'placement/availability-zone')
 
