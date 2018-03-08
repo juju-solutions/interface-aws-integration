@@ -125,22 +125,22 @@ class IntegrationRequest:
         return dict(self._unit.received.get('instance-tags', {}))
 
     @property
-    def security_group_tags(self):
+    def instance_security_group_tags(self):
         """
-        Mapping of tag names to values (or `None`) to apply to all of this
-        instance's security groups.
+        Mapping of tag names to values (or `None`) to apply to this instance's
+        Juju unit security group.
         """
         # uses dict() here to make a copy, just to be safe
-        return dict(self._unit.received.get('security-group-tags', {}))
+        return dict(self._unit.received.get('instance-sec-grp-tags', {}))
 
     @property
-    def subnet_tags(self):
+    def instance_subnet_tags(self):
         """
-        Mapping of tag names to values (or `None`) to apply to all of this
-        instance's subnets.
+        Mapping of tag names to values (or `None`) to apply to this instance's
+        subnet.
         """
         # uses dict() here to make a copy, just to be safe
-        return dict(self._unit.received.get('subnet-tags', {}))
+        return dict(self._unit.received.get('instance-subnet-tags', {}))
 
     @property
     def requested_elb(self):
