@@ -138,7 +138,7 @@ class AWSRequires(Endpoint):
         self._to_publish['instance-tags'] = dict(tags)
         clear_flag(self.expand_name('ready'))
 
-    def request_security_group_tags(self, tags):
+    def request_instance_security_group_tags(self, tags):
         """
         Request that the given tags be applied to all of this instance's
         security groups.
@@ -146,10 +146,10 @@ class AWSRequires(Endpoint):
         # Parameters
         tags (dict): Mapping of tag names to values (or `None`).
         """
-        self._to_publish['security-group-tags'] = dict(tags)
+        self._to_publish['instance-sec-grp-tags'] = dict(tags)
         clear_flag(self.expand_name('ready'))
 
-    def request_subnet_tags(self, tags):
+    def request_instance_subnet_tags(self, tags):
         """
         Request that the given tags be applied to all of this instance's
         subnets.
@@ -157,7 +157,7 @@ class AWSRequires(Endpoint):
         # Parameters
         tags (dict): Mapping of tag names to values (or `None`).
         """
-        self._to_publish['subnet-tags'] = dict(tags)
+        self._to_publish['instance-subnet-tags'] = dict(tags)
         clear_flag(self.expand_name('ready'))
 
     def enable_elb(self):
