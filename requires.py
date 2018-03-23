@@ -128,7 +128,7 @@ class AWSRequires(Endpoint):
         return sha256(json.dumps(dict(self._to_publish),
                                  sort_keys=True).encode('utf8')).hexdigest()
 
-    def request_instance_tags(self, tags):
+    def tag_instance(self, tags):
         """
         Request that the given tags be applied to this instance.
 
@@ -138,10 +138,10 @@ class AWSRequires(Endpoint):
         self._to_publish['instance-tags'] = dict(tags)
         clear_flag(self.expand_name('ready'))
 
-    def request_instance_security_group_tags(self, tags):
+    def tag_unit_security_group(self, tags):
         """
-        Request that the given tags be applied to all of this instance's
-        security groups.
+        Request that the given tags be applied to this instance's unit-specific
+        security group created by Juju.
 
         # Parameters
         tags (dict): Mapping of tag names to values (or `None`).
@@ -149,10 +149,9 @@ class AWSRequires(Endpoint):
         self._to_publish['instance-sec-grp-tags'] = dict(tags)
         clear_flag(self.expand_name('ready'))
 
-    def request_instance_subnet_tags(self, tags):
+    def tag_instance_subnet(self, tags):
         """
-        Request that the given tags be applied to all of this instance's
-        subnets.
+        Request that the given tags be applied to this instance's subnet.
 
         # Parameters
         tags (dict): Mapping of tag names to values (or `None`).
