@@ -58,6 +58,13 @@ class AWSProvides(Endpoint):
         return [request for request in all_requests
                 if request.changed]
 
+    @property
+    def application_names(self):
+        """
+        Set of names of all applications that are still joined.
+        """
+        return {unit.application_name for unit in self.all_joined_units}
+
 
 class IntegrationRequest:
     """
@@ -103,6 +110,13 @@ class IntegrationRequest:
         self._unit.relation.to_publish['completed'] = completed
 
     @property
+    def application_name(self):
+        """
+        The name of the application making the request.
+        """
+        return self._unit.application_name
+
+    @property
     def instance_id(self):
         """
         The instance ID reported for this request.
@@ -125,10 +139,10 @@ class IntegrationRequest:
         return dict(self._unit.received.get('instance-tags', {}))
 
     @property
-    def instance_security_group_tags(self):
+    def unit_security_group_tags(self):
         """
         Mapping of tag names to values (or `None`) to apply to this instance's
-        Juju unit security group.
+        unit-specific security group.
         """
         # uses dict() here to make a copy, just to be safe
         return dict(self._unit.received.get('instance-sec-grp-tags', {}))
