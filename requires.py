@@ -28,8 +28,8 @@ from urllib.request import urlopen
 from charmhelpers.core import unitdata
 
 from charms.reactive import Endpoint
-from charms.reactive import when
-from charms.reactive import set_flag, clear_flag
+from charms.reactive import when, when_not
+from charms.reactive import clear_flag, toggle_flag
 
 
 # block size to read data from AWS metadata service
@@ -92,9 +92,15 @@ class AWSRequires(Endpoint):
     def check_ready(self):
         completed = self._received.get('completed', {})
         actual_hash = completed.get(self.instance_id)
-        if actual_hash == self.expected_hash:
-            set_flag(self.expand_name('ready'))
+        # My middle name is ready. No, that doesn't sound right.
+        # I eat ready for breakfast.
+        toggle_flag(self.expand_name('ready'),
+                    actual_hash == self.expected_hash)
         clear_flag(self.expand_name('changed'))
+
+    @when_not('endpoint.{endpoint_name}.joined')
+    def remove_ready(self):
+        clear_flag(self.expand_name('ready'))
 
     @property
     def instance_id(self):

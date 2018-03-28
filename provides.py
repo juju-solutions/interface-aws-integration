@@ -42,10 +42,18 @@ class AWSProvides(Endpoint):
     """
 
     @when('endpoint.{endpoint_name}.changed')
-    def check_services(self):
-        toggle_flag(self.expand_name('requested'),
-                    len(self.requests) > 0)
+    def check_requests(self):
+        requests = self.requests
+        toggle_flag(self.expand_name('requested'), len(requests) > 0)
         clear_flag(self.expand_name('changed'))
+
+    @when('endpoint.{endpoint_name}.departed')
+    def cleanup(self):
+        for unit in self.all_departed_units:
+            request = IntegrationRequest(unit)
+            request._clear_hash()
+        self.all_departed_units.clear()
+        clear_flag(self.expand_name('departed'))
 
     @property
     def requests(self):
@@ -108,6 +116,9 @@ class IntegrationRequest:
         completed[self.instance_id] = self.hash
         unitdata.kv().set(self._hash_key, self.hash)
         self._unit.relation.to_publish['completed'] = completed
+
+    def _clear_hash(self):
+        unitdata.kv().unset(self._hash_key)
 
     @property
     def application_name(self):
