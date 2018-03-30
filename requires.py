@@ -139,7 +139,7 @@ class AWSRequires(Endpoint):
         Request that the given tags be applied to this instance.
 
         # Parameters
-        tags (dict): Mapping of tag names to values (or `None`).
+        `tags` (dict): Mapping of tag names to values (or `None`).
         """
         self._to_publish['instance-tags'] = dict(tags)
         clear_flag(self.expand_name('ready'))
@@ -150,7 +150,7 @@ class AWSRequires(Endpoint):
         security group created by Juju.
 
         # Parameters
-        tags (dict): Mapping of tag names to values (or `None`).
+        `tags` (dict): Mapping of tag names to values (or `None`).
         """
         self._to_publish['instance-sec-grp-tags'] = dict(tags)
         clear_flag(self.expand_name('ready'))
@@ -160,7 +160,7 @@ class AWSRequires(Endpoint):
         Request that the given tags be applied to this instance's subnet.
 
         # Parameters
-        tags (dict): Mapping of tag names to values (or `None`).
+        `tags` (dict): Mapping of tag names to values (or `None`).
         """
         self._to_publish['instance-subnet-tags'] = dict(tags)
         clear_flag(self.expand_name('ready'))
@@ -186,16 +186,36 @@ class AWSRequires(Endpoint):
         self._to_publish['enable-route53'] = True
         clear_flag(self.expand_name('ready'))
 
-    def enable_s3_read(self):
+    def enable_s3_read(self, patterns=None):
         """
         Request that S3 read-only integration be enabled for this instance.
+
+        # Parameters
+        `patterns` (list): If given, restrict access to S3 resources matching
+            the patterns. If patterns do not start with the S3 ARN prefix
+            (`arn:aws:s3:::`), it will be prepended.
         """
+        if patterns:
+            for i, pattern in enumerate(patterns):
+                if not pattern.startswith('arn:aws:s3:::'):
+                    patterns[i] = 'arn:aws:s3:::{}'.format(pattern)
         self._to_publish['enable-s3-read'] = True
+        self._to_publish['s3-read-patterns'] = patterns
         clear_flag(self.expand_name('ready'))
 
-    def enable_s3_write(self):
+    def enable_s3_write(self, patterns=None):
         """
         Request that S3 read/write integration be enabled for this instance.
+
+        # Parameters
+        `patterns` (list): If given, restrict access to S3 resources matching
+            the patterns. If patterns do not start with the S3 ARN prefix
+            (`arn:aws:s3:::`), it will be prepended.
         """
+        if patterns:
+            for i, pattern in enumerate(patterns):
+                if not pattern.startswith('arn:aws:s3:::'):
+                    patterns[i] = 'arn:aws:s3:::{}'.format(pattern)
         self._to_publish['enable-s3-write'] = True
+        self._to_publish['s3-write-patterns'] = patterns
         clear_flag(self.expand_name('ready'))

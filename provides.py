@@ -196,8 +196,22 @@ class IntegrationRequest:
         return bool(self._unit.received['enable-s3-read'])
 
     @property
+    def s3_read_patterns(self):
+        """
+        List of patterns to which to restrict S3 read access.
+        """
+        return list(self._unit.received['s3-read-patterns'] or [])
+
+    @property
     def requested_s3_write(self):
         """
         Flag indicating whether S3 read/write integration was requested.
         """
         return bool(self._unit.received['enable-s3-write'])
+
+    @property
+    def s3_write_patterns(self):
+        """
+        List of patterns to which to restrict S3 write access.
+        """
+        return list(self._unit.received['s3-write-patterns'] or [])
