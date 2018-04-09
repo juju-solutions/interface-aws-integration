@@ -65,6 +65,11 @@ class AWSRequires(Endpoint):
     _instance_id_url = urljoin(_metadata_url, 'instance-id')
     _az_url = urljoin(_metadata_url, 'placement/availability-zone')
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._instance_id = None
+        self._region = None
+
     @property
     def _received(self):
         """
@@ -95,7 +100,7 @@ class AWSRequires(Endpoint):
         # My middle name is ready. No, that doesn't sound right.
         # I eat ready for breakfast.
         toggle_flag(self.expand_name('ready'),
-                    actual_hash == self.expected_hash)
+                    self._requested and actual_hash == self._expected_hash)
         clear_flag(self.expand_name('changed'))
 
     @when_not('endpoint.{endpoint_name}.joined')
@@ -104,7 +109,10 @@ class AWSRequires(Endpoint):
 
     @property
     def instance_id(self):
-        if not hasattr(self, '_instance_id'):
+        """
+        This unit's instance-id.
+        """
+        if self._instance_id is None:
             cache_key = self.expand_name('instance-id')
             cached = unitdata.kv().get(cache_key)
             if cached:
@@ -117,7 +125,10 @@ class AWSRequires(Endpoint):
 
     @property
     def region(self):
-        if not hasattr(self, '_region'):
+        """
+        The region this unit is in.
+        """
+        if self._region is None:
             cache_key = self.expand_name('region')
             cached = unitdata.kv().get(cache_key)
             if cached:
@@ -130,9 +141,19 @@ class AWSRequires(Endpoint):
         return self._region
 
     @property
-    def expected_hash(self):
+    def _expected_hash(self):
         return sha256(json.dumps(dict(self._to_publish),
                                  sort_keys=True).encode('utf8')).hexdigest()
+
+    @property
+    def _requested(self):
+        # whether or not a request has been issued
+        return self._to_publish['requested']
+
+    def _request(self, keyvals):
+        self._to_publish.update(keyvals)
+        self._to_publish['requested'] = True
+        clear_flag(self.expand_name('ready'))
 
     def tag_instance(self, tags):
         """
@@ -141,19 +162,17 @@ class AWSRequires(Endpoint):
         # Parameters
         `tags` (dict): Mapping of tag names to values (or `None`).
         """
-        self._to_publish['instance-tags'] = dict(tags)
-        clear_flag(self.expand_name('ready'))
+        self._request({'instance-tags': dict(tags)})
 
-    def tag_unit_security_group(self, tags):
+    def tag_instance_security_group(self, tags):
         """
-        Request that the given tags be applied to this instance's unit-specific
-        security group created by Juju.
+        Request that the given tags be applied to this instance's
+        machine-specific security group (firewall) created by Juju.
 
         # Parameters
         `tags` (dict): Mapping of tag names to values (or `None`).
         """
-        self._to_publish['instance-sec-grp-tags'] = dict(tags)
-        clear_flag(self.expand_name('ready'))
+        self._request({'instance-security-group-tags': dict(tags)})
 
     def tag_instance_subnet(self, tags):
         """
@@ -162,29 +181,37 @@ class AWSRequires(Endpoint):
         # Parameters
         `tags` (dict): Mapping of tag names to values (or `None`).
         """
-        self._to_publish['instance-subnet-tags'] = dict(tags)
-        clear_flag(self.expand_name('ready'))
+        self._request({'instance-subnet-tags': dict(tags)})
+
+    def enable_instance_inspection(self):
+        """
+        Request the ability to inspect instances.
+        """
+        self._request({'enable-instance-inspection': True})
+
+    def enable_network_management(self):
+        """
+        Request the ability to manage networking (firewalls, subnets, etc).
+        """
+        self._request({'enable-network-management': True})
 
     def enable_elb(self):
         """
         Request that ELB integration be enabled for this instance.
         """
-        self._to_publish['enable-elb'] = True
-        clear_flag(self.expand_name('ready'))
+        self._request({'enable-elb': True})
 
     def enable_ebs(self):
         """
         Request that EBS integration be enabled for this instance.
         """
-        self._to_publish['enable-ebs'] = True
-        clear_flag(self.expand_name('ready'))
+        self._request({'enable-ebs': True})
 
     def enable_route53(self):
         """
         Request that Route53 integration be enabled for this instance.
         """
-        self._to_publish['enable-route53'] = True
-        clear_flag(self.expand_name('ready'))
+        self._request({'enable-route53': True})
 
     def enable_s3_read(self, patterns=None):
         """
@@ -199,9 +226,10 @@ class AWSRequires(Endpoint):
             for i, pattern in enumerate(patterns):
                 if not pattern.startswith('arn:aws:s3:::'):
                     patterns[i] = 'arn:aws:s3:::{}'.format(pattern)
-        self._to_publish['enable-s3-read'] = True
-        self._to_publish['s3-read-patterns'] = patterns
-        clear_flag(self.expand_name('ready'))
+        self._request({
+            'enable-s3-read': True,
+            's3-read-patterns': patterns,
+        })
 
     def enable_s3_write(self, patterns=None):
         """
@@ -216,6 +244,7 @@ class AWSRequires(Endpoint):
             for i, pattern in enumerate(patterns):
                 if not pattern.startswith('arn:aws:s3:::'):
                     patterns[i] = 'arn:aws:s3:::{}'.format(pattern)
-        self._to_publish['enable-s3-write'] = True
-        self._to_publish['s3-write-patterns'] = patterns
-        clear_flag(self.expand_name('ready'))
+        self._request({
+            'enable-s3-write': True,
+            's3-write-patterns': patterns,
+        })

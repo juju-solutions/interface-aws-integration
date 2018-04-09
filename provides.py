@@ -51,7 +51,7 @@ class AWSProvides(Endpoint):
     def cleanup(self):
         for unit in self.all_departed_units:
             request = IntegrationRequest(unit)
-            request._clear_hash()
+            request.clear()
         self.all_departed_units.clear()
         clear_flag(self.expand_name('departed'))
 
@@ -72,6 +72,18 @@ class AWSProvides(Endpoint):
         Set of names of all applications that are still joined.
         """
         return {unit.application_name for unit in self.all_joined_units}
+
+    @property
+    def unit_instances(self):
+        """
+        Mapping of unit names to instance IDs and regions for all joined units.
+        """
+        return {
+            unit.unit_name: {
+                'instance-id': unit.received['instance-id'],
+                'region': unit.received['region'],
+            } for unit in self.all_joined_units
+        }
 
 
 class IntegrationRequest:
@@ -102,7 +114,7 @@ class IntegrationRequest:
         Whether this request has changed since the last time it was
         marked completed.
         """
-        if not self.instance_id:
+        if not (self.instance_id and self._requested):
             return False
         saved_hash = unitdata.kv().get(self._hash_key)
         result = saved_hash != self.hash
@@ -117,8 +129,18 @@ class IntegrationRequest:
         unitdata.kv().set(self._hash_key, self.hash)
         self._unit.relation.to_publish['completed'] = completed
 
-    def _clear_hash(self):
+    def clear(self):
+        """
+        Clear this request's cached data.
+        """
         unitdata.kv().unset(self._hash_key)
+
+    @property
+    def unit_name(self):
+        """
+        The name of the unit making the request.
+        """
+        return self._unit.unit_name
 
     @property
     def application_name(self):
@@ -126,6 +148,10 @@ class IntegrationRequest:
         The name of the application making the request.
         """
         return self._unit.application_name
+
+    @property
+    def _requested(self):
+        return self._unit.received['requested']
 
     @property
     def instance_id(self):
@@ -150,13 +176,14 @@ class IntegrationRequest:
         return dict(self._unit.received.get('instance-tags', {}))
 
     @property
-    def unit_security_group_tags(self):
+    def instance_security_group_tags(self):
         """
         Mapping of tag names to values (or `None`) to apply to this instance's
-        unit-specific security group.
+        machine-specific security group (firewall).
         """
         # uses dict() here to make a copy, just to be safe
-        return dict(self._unit.received.get('instance-sec-grp-tags', {}))
+        return dict(self._unit.received.get('instance-security-group-tags',
+                                            {}))
 
     @property
     def instance_subnet_tags(self):
@@ -166,6 +193,21 @@ class IntegrationRequest:
         """
         # uses dict() here to make a copy, just to be safe
         return dict(self._unit.received.get('instance-subnet-tags', {}))
+
+    @property
+    def requested_instance_inspection(self):
+        """
+        Flag indicating whether the ability to inspect instances was requested.
+        """
+        return bool(self._unit.received['enable-instance-inspection'])
+
+    @property
+    def requested_network_management(self):
+        """
+        Flag indicating whether the ability to manage networking (firewalls,
+        subnets, etc) was requested.
+        """
+        return bool(self._unit.received['enable-network-management'])
 
     @property
     def requested_elb(self):
