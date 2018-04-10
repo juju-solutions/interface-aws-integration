@@ -51,7 +51,7 @@ class AWSRequires(Endpoint):
             'tag1': 'value1',
             'tag2': None,
         })
-        aws.request_elb()
+        aws.request_load_balancer_management()
         # ...
 
     @when('endpoint.aws.ready')
@@ -195,30 +195,30 @@ class AWSRequires(Endpoint):
         """
         self._request({'enable-network-management': True})
 
-    def enable_elb(self):
+    def enable_load_balancer_management(self):
         """
-        Request that ELB integration be enabled for this instance.
+        Request the ability to manage load balancers.
         """
-        self._request({'enable-elb': True})
+        self._request({'enable-load-balancer-management': True})
 
-    def enable_ebs(self):
+    def enable_block_storage_management(self):
         """
-        Request that EBS integration be enabled for this instance.
+        Request the ability to manage block storage.
         """
-        self._request({'enable-ebs': True})
+        self._request({'enable-block-storage-management': True})
 
-    def enable_route53(self):
+    def enable_dns(self):
         """
-        Request that Route53 integration be enabled for this instance.
+        Request the ability to manage DNS.
         """
-        self._request({'enable-route53': True})
+        self._request({'enable-dns': True})
 
-    def enable_s3_read(self, patterns=None):
+    def enable_object_storage_access(self, patterns=None):
         """
-        Request that S3 read-only integration be enabled for this instance.
+        Request the ability to access object storage.
 
         # Parameters
-        `patterns` (list): If given, restrict access to S3 resources matching
+        `patterns` (list): If given, restrict access to the resources matching
             the patterns. If patterns do not start with the S3 ARN prefix
             (`arn:aws:s3:::`), it will be prepended.
         """
@@ -227,24 +227,24 @@ class AWSRequires(Endpoint):
                 if not pattern.startswith('arn:aws:s3:::'):
                     patterns[i] = 'arn:aws:s3:::{}'.format(pattern)
         self._request({
-            'enable-s3-read': True,
-            's3-read-patterns': patterns,
+            'enable-object-storage-access': True,
+            'object-storage-access-patterns': patterns,
         })
 
-    def enable_s3_write(self, patterns=None):
+    def enable_object_storage_management(self, patterns=None):
         """
-        Request that S3 read/write integration be enabled for this instance.
+        Request the ability to manage object storage.
 
         # Parameters
-        `patterns` (list): If given, restrict access to S3 resources matching
-            the patterns. If patterns do not start with the S3 ARN prefix
-            (`arn:aws:s3:::`), it will be prepended.
+        `patterns` (list): If given, restrict management to the resources
+            matching the patterns. If patterns do not start with the S3 ARN
+            prefix (`arn:aws:s3:::`), it will be prepended.
         """
         if patterns:
             for i, pattern in enumerate(patterns):
                 if not pattern.startswith('arn:aws:s3:::'):
                     patterns[i] = 'arn:aws:s3:::{}'.format(pattern)
         self._request({
-            'enable-s3-write': True,
-            's3-write-patterns': patterns,
+            'enable-object-storage-management': True,
+            'object-storage-management-patterns': patterns,
         })

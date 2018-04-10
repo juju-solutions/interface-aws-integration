@@ -27,15 +27,23 @@ class AWSProvides(Endpoint):
 
     ```python
     from charms.reactive import when, endpoint_from_flag
+    from charms import layer
 
     @when('endpoint.aws.requested')
     def handle_requests():
         aws = endpoint_from_flag('endpoint.aws.requested')
         for request in aws.requests:
             if request.instance_tags:
-                tag_instance(request.instance_id, request.instance_tags)
-            if request.requested_elb:
-                enable_elb(request.instance_id)
+                tag_instance(
+                    request.instance_id,
+                    request.region,
+                    request.instance_tags)
+            if request.requested_load_balancer_management:
+                layer.aws.enable_load_balancer_management(
+                    request.application_name,
+                    request.instance_id,
+                    request.region,
+                )
             # ...
             request.mark_completed()
     ```
@@ -210,50 +218,52 @@ class IntegrationRequest:
         return bool(self._unit.received['enable-network-management'])
 
     @property
-    def requested_elb(self):
+    def requested_load_balancer_management(self):
         """
-        Flag indicating whether ELB integration was requested.
+        Flag indicating whether load balancer management was requested.
         """
-        return bool(self._unit.received['enable-elb'])
+        return bool(self._unit.received['enable-load-balancer-management'])
 
     @property
-    def requested_ebs(self):
+    def requested_block_storage_management(self):
         """
-        Flag indicating whether EBS integration was requested.
+        Flag indicating whether block storage management was requested.
         """
-        return bool(self._unit.received['enable-ebs'])
+        return bool(self._unit.received['enable-block-storage-management'])
 
     @property
-    def requested_route53(self):
+    def requested_dns_management(self):
         """
-        Flag indicating whether Route53 integration was requested.
+        Flag indicating whether DNS management was requested.
         """
-        return bool(self._unit.received['enable-route53'])
+        return bool(self._unit.received['enable-dns-management'])
 
     @property
-    def requested_s3_read(self):
+    def requested_object_storage_access(self):
         """
-        Flag indicating whether S3 read-only integration was requested.
+        Flag indicating whether object storage access was requested.
         """
-        return bool(self._unit.received['enable-s3-read'])
+        return bool(self._unit.received['enable-object-storage-access'])
 
     @property
-    def s3_read_patterns(self):
+    def object_storage_access_patterns(self):
         """
-        List of patterns to which to restrict S3 read access.
+        List of patterns to which to restrict object storage access.
         """
-        return list(self._unit.received['s3-read-patterns'] or [])
+        return list(
+            self._unit.received['object-storage-access-patterns'] or [])
 
     @property
-    def requested_s3_write(self):
+    def requested_object_storage_management(self):
         """
-        Flag indicating whether S3 read/write integration was requested.
+        Flag indicating whether object storage management was requested.
         """
-        return bool(self._unit.received['enable-s3-write'])
+        return bool(self._unit.received['enable-object-storage-management'])
 
     @property
-    def s3_write_patterns(self):
+    def object_storage_management_patterns(self):
         """
-        List of patterns to which to restrict S3 write access.
+        List of patterns to which to restrict object storage management.
         """
-        return list(self._unit.received['s3-write-patterns'] or [])
+        return list(
+            self._unit.received['object-storage-management-patterns'] or [])

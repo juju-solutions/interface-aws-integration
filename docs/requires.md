@@ -22,7 +22,7 @@ The flags that are set by the requires side of this interface are:
 <h1 id="requires.AWSRequires">AWSRequires</h1>
 
 ```python
-AWSRequires(self, endpoint_name, relation_ids=None)
+AWSRequires(self, *args, **kwargs)
 ```
 
 Example usage:
@@ -37,7 +37,7 @@ def request_aws_integration():
         'tag1': 'value1',
         'tag2': None,
     })
-    aws.request_elb()
+    aws.request_load_balancer_management()
     # ...
 
 @when('endpoint.aws.ready')
@@ -45,81 +45,118 @@ def aws_integration_ready():
     update_config_enable_aws()
 ```
 
-<h2 id="requires.AWSRequires.enable_route53">enable_route53</h2>
+<h2 id="requires.AWSRequires.enable_network_management">enable_network_management</h2>
 
 ```python
-AWSRequires.enable_route53(self)
+AWSRequires.enable_network_management(self)
 ```
 
-Request that Route53 integration be enabled for this instance.
+Request the ability to manage networking (firewalls, subnets, etc).
 
-<h2 id="requires.AWSRequires.request_instance_tags">request_instance_tags</h2>
+<h2 id="requires.AWSRequires.instance_id">instance_id</h2>
+
+
+This unit's instance-id.
+
+<h2 id="requires.AWSRequires.enable_load_balancer_management">enable_load_balancer_management</h2>
 
 ```python
-AWSRequires.request_instance_tags(self, tags)
+AWSRequires.enable_load_balancer_management(self)
+```
+
+Request the ability to manage load balancers.
+
+<h2 id="requires.AWSRequires.tag_instance_subnet">tag_instance_subnet</h2>
+
+```python
+AWSRequires.tag_instance_subnet(self, tags)
+```
+
+Request that the given tags be applied to this instance's subnet.
+
+__Parameters__
+
+- __`tags` (dict)__: Mapping of tag names to values (or `None`).
+
+<h2 id="requires.AWSRequires.enable_object_storage_access">enable_object_storage_access</h2>
+
+```python
+AWSRequires.enable_object_storage_access(self, patterns=None)
+```
+
+Request the ability to access object storage.
+
+__Parameters__
+
+- __`patterns` (list)__: If given, restrict access to the resources matching
+    the patterns. If patterns do not start with the S3 ARN prefix
+- __(`arn:aws:s3::__:`), it will be prepended.
+
+<h2 id="requires.AWSRequires.region">region</h2>
+
+
+The region this unit is in.
+
+<h2 id="requires.AWSRequires.enable_dns">enable_dns</h2>
+
+```python
+AWSRequires.enable_dns(self)
+```
+
+Request the ability to manage DNS.
+
+<h2 id="requires.AWSRequires.tag_instance_security_group">tag_instance_security_group</h2>
+
+```python
+AWSRequires.tag_instance_security_group(self, tags)
+```
+
+Request that the given tags be applied to this instance's
+machine-specific security group (firewall) created by Juju.
+
+__Parameters__
+
+- __`tags` (dict)__: Mapping of tag names to values (or `None`).
+
+<h2 id="requires.AWSRequires.enable_block_storage_management">enable_block_storage_management</h2>
+
+```python
+AWSRequires.enable_block_storage_management(self)
+```
+
+Request the ability to manage block storage.
+
+<h2 id="requires.AWSRequires.enable_object_storage_management">enable_object_storage_management</h2>
+
+```python
+AWSRequires.enable_object_storage_management(self, patterns=None)
+```
+
+Request the ability to manage object storage.
+
+__Parameters__
+
+- __`patterns` (list)__: If given, restrict management to the resources
+    matching the patterns. If patterns do not start with the S3 ARN
+- __prefix (`arn:aws:s3::__:`), it will be prepended.
+
+<h2 id="requires.AWSRequires.enable_instance_inspection">enable_instance_inspection</h2>
+
+```python
+AWSRequires.enable_instance_inspection(self)
+```
+
+Request the ability to inspect instances.
+
+<h2 id="requires.AWSRequires.tag_instance">tag_instance</h2>
+
+```python
+AWSRequires.tag_instance(self, tags)
 ```
 
 Request that the given tags be applied to this instance.
 
 __Parameters__
 
-- __tags (dict)__: Mapping of tag names to values (or `None`).
-
-<h2 id="requires.AWSRequires.enable_s3_write">enable_s3_write</h2>
-
-```python
-AWSRequires.enable_s3_write(self)
-```
-
-Request that S3 read/write integration be enabled for this instance.
-
-<h2 id="requires.AWSRequires.enable_s3_read">enable_s3_read</h2>
-
-```python
-AWSRequires.enable_s3_read(self)
-```
-
-Request that S3 read-only integration be enabled for this instance.
-
-<h2 id="requires.AWSRequires.enable_elb">enable_elb</h2>
-
-```python
-AWSRequires.enable_elb(self)
-```
-
-Request that ELB integration be enabled for this instance.
-
-<h2 id="requires.AWSRequires.enable_ebs">enable_ebs</h2>
-
-```python
-AWSRequires.enable_ebs(self)
-```
-
-Request that EBS integration be enabled for this instance.
-
-<h2 id="requires.AWSRequires.request_security_group_tags">request_security_group_tags</h2>
-
-```python
-AWSRequires.request_security_group_tags(self, tags)
-```
-
-Request that the given tags be applied to all of this instance's
-security groups.
-
-__Parameters__
-
-- __tags (dict)__: Mapping of tag names to values (or `None`).
-
-<h2 id="requires.AWSRequires.request_subnet_tags">request_subnet_tags</h2>
-
-```python
-AWSRequires.request_subnet_tags(self, tags)
-```
-
-Request that the given tags be applied to all of this instance's
-subnets.
-
-__Parameters__
-
-- __tags (dict)__: Mapping of tag names to values (or `None`).
+- __`tags` (dict)__: Mapping of tag names to values (or `None`).
 
