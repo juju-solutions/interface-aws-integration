@@ -38,7 +38,7 @@ class AWSProvides(Endpoint):
                     request.instance_id,
                     request.region,
                     request.instance_tags)
-            if request.requested_elb:
+            if request.requested_load_balancer_management:
                 layer.aws.enable_load_balancer_management(
                     request.application_name,
                     request.instance_id,
