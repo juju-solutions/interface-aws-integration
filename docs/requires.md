@@ -45,6 +45,18 @@ def aws_integration_ready():
     update_config_enable_aws()
 ```
 
+<h2 id="requires.AWSRequires.tag_instance">tag_instance</h2>
+
+```python
+AWSRequires.tag_instance(self, tags)
+```
+
+Request that the given tags be applied to this instance.
+
+__Parameters__
+
+- __`tags` (dict)__: Mapping of tag names to values (or `None`).
+
 <h2 id="requires.AWSRequires.enable_object_storage_access">enable_object_storage_access</h2>
 
 ```python
@@ -59,6 +71,14 @@ __Parameters__
     the patterns. If patterns do not start with the S3 ARN prefix
 - __(`arn:aws:s3::__:`), it will be prepended.
 
+<h2 id="requires.AWSRequires.enable_load_balancer_management">enable_load_balancer_management</h2>
+
+```python
+AWSRequires.enable_load_balancer_management(self)
+```
+
+Request the ability to manage load balancers.
+
 <h2 id="requires.AWSRequires.enable_network_management">enable_network_management</h2>
 
 ```python
@@ -66,77 +86,6 @@ AWSRequires.enable_network_management(self)
 ```
 
 Request the ability to manage networking (firewalls, subnets, etc).
-
-<h2 id="requires.AWSRequires.tag_instance_subnet">tag_instance_subnet</h2>
-
-```python
-AWSRequires.tag_instance_subnet(self, tags)
-```
-
-Request that the given tags be applied to this instance's subnet.
-
-__Parameters__
-
-- __`tags` (dict)__: Mapping of tag names to values (or `None`).
-
-<h2 id="requires.AWSRequires.enable_block_storage_management">enable_block_storage_management</h2>
-
-```python
-AWSRequires.enable_block_storage_management(self)
-```
-
-Request the ability to manage block storage.
-
-<h2 id="requires.AWSRequires.tag_instance_security_group">tag_instance_security_group</h2>
-
-```python
-AWSRequires.tag_instance_security_group(self, tags)
-```
-
-Request that the given tags be applied to this instance's
-machine-specific security group (firewall) created by Juju.
-
-__Parameters__
-
-- __`tags` (dict)__: Mapping of tag names to values (or `None`).
-
-<h2 id="requires.AWSRequires.enable_dns">enable_dns</h2>
-
-```python
-AWSRequires.enable_dns(self)
-```
-
-Request the ability to manage DNS.
-
-<h2 id="requires.AWSRequires.region">region</h2>
-
-
-The region this unit is in.
-
-<h2 id="requires.AWSRequires.tag_instance">tag_instance</h2>
-
-```python
-AWSRequires.tag_instance(self, tags)
-```
-
-Request that the given tags be applied to this instance.
-
-__Parameters__
-
-- __`tags` (dict)__: Mapping of tag names to values (or `None`).
-
-<h2 id="requires.AWSRequires.instance_id">instance_id</h2>
-
-
-This unit's instance-id.
-
-<h2 id="requires.AWSRequires.enable_instance_inspection">enable_instance_inspection</h2>
-
-```python
-AWSRequires.enable_instance_inspection(self)
-```
-
-Request the ability to inspect instances.
 
 <h2 id="requires.AWSRequires.enable_object_storage_management">enable_object_storage_management</h2>
 
@@ -152,11 +101,62 @@ __Parameters__
     matching the patterns. If patterns do not start with the S3 ARN
 - __prefix (`arn:aws:s3::__:`), it will be prepended.
 
-<h2 id="requires.AWSRequires.enable_load_balancer_management">enable_load_balancer_management</h2>
+<h2 id="requires.AWSRequires.enable_block_storage_management">enable_block_storage_management</h2>
 
 ```python
-AWSRequires.enable_load_balancer_management(self)
+AWSRequires.enable_block_storage_management(self)
 ```
 
-Request the ability to manage load balancers.
+Request the ability to manage block storage.
+
+<h2 id="requires.AWSRequires.region">region</h2>
+
+
+The region this unit is in.
+
+<h2 id="requires.AWSRequires.instance_id">instance_id</h2>
+
+
+This unit's instance-id.
+
+<h2 id="requires.AWSRequires.tag_instance_security_group">tag_instance_security_group</h2>
+
+```python
+AWSRequires.tag_instance_security_group(self, tags)
+```
+
+Request that the given tags be applied to this instance's
+machine-specific security group (firewall) created by Juju.
+
+__Parameters__
+
+- __`tags` (dict)__: Mapping of tag names to values (or `None`).
+
+<h2 id="requires.AWSRequires.tag_instance_subnet">tag_instance_subnet</h2>
+
+```python
+AWSRequires.tag_instance_subnet(self, tags)
+```
+
+Request that the given tags be applied to this instance's subnet.
+
+__Parameters__
+
+- __`tags` (dict)__: Mapping of tag names to values (or `None`).
+
+<h2 id="requires.AWSRequires.enable_instance_inspection">enable_instance_inspection</h2>
+
+```python
+AWSRequires.enable_instance_inspection(self)
+```
+
+Request the ability to inspect instances.
+
+<h2 id="requires.AWSRequires.enable_dns">enable_dns</h2>
+
+```python
+AWSRequires.enable_dns(self)
+```
+
+Request the ability to manage DNS.
 
