@@ -124,10 +124,10 @@ AWSRequires.enable_block_storage_management(self)
 
 Request the ability to manage block storage.
 
-<h2 id="requires.AWSRequires.enable_dns">enable_dns</h2>
+<h2 id="requires.AWSRequires.enable_dns_management">enable_dns_management</h2>
 
 ```python
-AWSRequires.enable_dns(self)
+AWSRequires.enable_dns_management(self)
 ```
 
 Request the ability to manage DNS.

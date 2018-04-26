@@ -207,7 +207,7 @@ class AWSRequires(Endpoint):
         """
         self._request({'enable-block-storage-management': True})
 
-    def enable_dns(self):
+    def enable_dns_management(self):
         """
         Request the ability to manage DNS.
         """
