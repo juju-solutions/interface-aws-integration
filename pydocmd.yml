@@ -3,10 +3,10 @@ site_name: 'AWS Integration Interface'
 generate:
   - requires.md:
     - requires
-    - requires.AWSRequires+
+    - requires.AWSIntegrationRequires+
   - provides.md:
     - provides
-    - provides.AWSProvides+
+    - provides.AWSIntegrationProvides+
     - provides.IntegrationRequest+
 
 pages:
