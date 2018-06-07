@@ -37,7 +37,7 @@ from charms.reactive import clear_flag, toggle_flag
 READ_BLOCK_SIZE = 2048
 
 
-class AWSRequires(Endpoint):
+class AWSIntegrationRequires(Endpoint):
     """
     Example usage:
 

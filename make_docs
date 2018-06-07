@@ -8,8 +8,10 @@ import pydocmd.__main__
 
 
 with patch('charmhelpers.core.hookenv.metadata') as metadata:
-    metadata.return_value = {'requires': {'aws': {'interface': 'aws'}},
-                             'provides': {'aws': {'interface': 'aws'}}}
+    metadata.return_value = {
+        'requires': {'aws': {'interface': 'aws-integration'}},
+        'provides': {'aws': {'interface': 'aws-integration'}},
+    }
     sys.path.insert(0, '.')
     print(sys.argv)
     if len(sys.argv) == 1:

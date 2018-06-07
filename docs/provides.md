@@ -2,7 +2,7 @@
 
 
 This is the provides side of the interface layer, for use only by the AWS
-integration charm itself.
+integrator charm itself.
 
 The flags that are set by the provides side of this interface are:
 
@@ -12,10 +12,10 @@ The flags that are set by the provides side of this interface are:
   whatever actions are necessary to satisfy those requests, and then mark
   them as complete.
 
-<h1 id="provides.AWSProvides">AWSProvides</h1>
+<h1 id="provides.AWSIntegrationProvides">AWSIntegrationProvides</h1>
 
 ```python
-AWSProvides(self, endpoint_name, relation_ids=None)
+AWSIntegrationProvides(self, endpoint_name, relation_ids=None)
 ```
 
 Example usage:
@@ -43,18 +43,18 @@ def handle_requests():
         request.mark_completed()
 ```
 
-<h2 id="provides.AWSProvides.application_names">application_names</h2>
+<h2 id="provides.AWSIntegrationProvides.application_names">application_names</h2>
 
 
 Set of names of all applications that are still joined.
 
-<h2 id="provides.AWSProvides.requests">requests</h2>
+<h2 id="provides.AWSIntegrationProvides.requests">requests</h2>
 
 
 A list of the new or updated `IntegrationRequests` that
 have been made.
 
-<h2 id="provides.AWSProvides.unit_instances">unit_instances</h2>
+<h2 id="provides.AWSIntegrationProvides.unit_instances">unit_instances</h2>
 
 
 Mapping of unit names to instance IDs and regions for all joined units.

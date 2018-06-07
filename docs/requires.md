@@ -19,10 +19,10 @@ The flags that are set by the requires side of this interface are:
   running.  This flag is automatically removed if new integration features
   are requested.  It should not be removed by the charm.
 
-<h1 id="requires.AWSRequires">AWSRequires</h1>
+<h1 id="requires.AWSIntegrationRequires">AWSIntegrationRequires</h1>
 
 ```python
-AWSRequires(self, *args, **kwargs)
+AWSIntegrationRequires(self, *args, **kwargs)
 ```
 
 Example usage:
@@ -45,20 +45,20 @@ def aws_integration_ready():
     update_config_enable_aws()
 ```
 
-<h2 id="requires.AWSRequires.instance_id">instance_id</h2>
+<h2 id="requires.AWSIntegrationRequires.instance_id">instance_id</h2>
 
 
 This unit's instance-id.
 
-<h2 id="requires.AWSRequires.region">region</h2>
+<h2 id="requires.AWSIntegrationRequires.region">region</h2>
 
 
 The region this unit is in.
 
-<h2 id="requires.AWSRequires.tag_instance">tag_instance</h2>
+<h2 id="requires.AWSIntegrationRequires.tag_instance">tag_instance</h2>
 
 ```python
-AWSRequires.tag_instance(self, tags)
+AWSIntegrationRequires.tag_instance(self, tags)
 ```
 
 Request that the given tags be applied to this instance.
@@ -67,10 +67,10 @@ __Parameters__
 
 - __`tags` (dict)__: Mapping of tag names to values (or `None`).
 
-<h2 id="requires.AWSRequires.tag_instance_security_group">tag_instance_security_group</h2>
+<h2 id="requires.AWSIntegrationRequires.tag_instance_security_group">tag_instance_security_group</h2>
 
 ```python
-AWSRequires.tag_instance_security_group(self, tags)
+AWSIntegrationRequires.tag_instance_security_group(self, tags)
 ```
 
 Request that the given tags be applied to this instance's
@@ -80,10 +80,10 @@ __Parameters__
 
 - __`tags` (dict)__: Mapping of tag names to values (or `None`).
 
-<h2 id="requires.AWSRequires.tag_instance_subnet">tag_instance_subnet</h2>
+<h2 id="requires.AWSIntegrationRequires.tag_instance_subnet">tag_instance_subnet</h2>
 
 ```python
-AWSRequires.tag_instance_subnet(self, tags)
+AWSIntegrationRequires.tag_instance_subnet(self, tags)
 ```
 
 Request that the given tags be applied to this instance's subnet.
@@ -92,50 +92,50 @@ __Parameters__
 
 - __`tags` (dict)__: Mapping of tag names to values (or `None`).
 
-<h2 id="requires.AWSRequires.enable_instance_inspection">enable_instance_inspection</h2>
+<h2 id="requires.AWSIntegrationRequires.enable_instance_inspection">enable_instance_inspection</h2>
 
 ```python
-AWSRequires.enable_instance_inspection(self)
+AWSIntegrationRequires.enable_instance_inspection(self)
 ```
 
 Request the ability to inspect instances.
 
-<h2 id="requires.AWSRequires.enable_network_management">enable_network_management</h2>
+<h2 id="requires.AWSIntegrationRequires.enable_network_management">enable_network_management</h2>
 
 ```python
-AWSRequires.enable_network_management(self)
+AWSIntegrationRequires.enable_network_management(self)
 ```
 
 Request the ability to manage networking (firewalls, subnets, etc).
 
-<h2 id="requires.AWSRequires.enable_load_balancer_management">enable_load_balancer_management</h2>
+<h2 id="requires.AWSIntegrationRequires.enable_load_balancer_management">enable_load_balancer_management</h2>
 
 ```python
-AWSRequires.enable_load_balancer_management(self)
+AWSIntegrationRequires.enable_load_balancer_management(self)
 ```
 
 Request the ability to manage load balancers.
 
-<h2 id="requires.AWSRequires.enable_block_storage_management">enable_block_storage_management</h2>
+<h2 id="requires.AWSIntegrationRequires.enable_block_storage_management">enable_block_storage_management</h2>
 
 ```python
-AWSRequires.enable_block_storage_management(self)
+AWSIntegrationRequires.enable_block_storage_management(self)
 ```
 
 Request the ability to manage block storage.
 
-<h2 id="requires.AWSRequires.enable_dns_management">enable_dns_management</h2>
+<h2 id="requires.AWSIntegrationRequires.enable_dns_management">enable_dns_management</h2>
 
 ```python
-AWSRequires.enable_dns_management(self)
+AWSIntegrationRequires.enable_dns_management(self)
 ```
 
 Request the ability to manage DNS.
 
-<h2 id="requires.AWSRequires.enable_object_storage_access">enable_object_storage_access</h2>
+<h2 id="requires.AWSIntegrationRequires.enable_object_storage_access">enable_object_storage_access</h2>
 
 ```python
-AWSRequires.enable_object_storage_access(self, patterns=None)
+AWSIntegrationRequires.enable_object_storage_access(self, patterns=None)
 ```
 
 Request the ability to access object storage.
@@ -144,12 +144,12 @@ __Parameters__
 
 - __`patterns` (list)__: If given, restrict access to the resources matching
     the patterns. If patterns do not start with the S3 ARN prefix
-- __(`arn:aws:s3::__:`), it will be prepended.
+- __(`arn__:aws:s3:::`), it will be prepended.
 
-<h2 id="requires.AWSRequires.enable_object_storage_management">enable_object_storage_management</h2>
+<h2 id="requires.AWSIntegrationRequires.enable_object_storage_management">enable_object_storage_management</h2>
 
 ```python
-AWSRequires.enable_object_storage_management(self, patterns=None)
+AWSIntegrationRequires.enable_object_storage_management(self, patterns=None)
 ```
 
 Request the ability to manage object storage.
@@ -158,5 +158,5 @@ __Parameters__
 
 - __`patterns` (list)__: If given, restrict management to the resources
     matching the patterns. If patterns do not start with the S3 ARN
-- __prefix (`arn:aws:s3::__:`), it will be prepended.
+- __prefix (`arn__:aws:s3:::`), it will be prepended.
 
