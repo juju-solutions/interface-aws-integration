@@ -183,6 +183,18 @@ class AWSIntegrationRequires(Endpoint):
         """
         self._request({'instance-subnet-tags': dict(tags)})
 
+    def enable_acm_readonly(self):
+        """
+        Request readonly for ACM.
+        """
+        self._request({'enable-acm-readonly': True})
+
+    def enable_acm_fullaccess(self):
+        """
+        Request fullaccess for ACM.
+        """
+        self._request({'enable-acm-fullaccess': True})
+
     def enable_instance_inspection(self):
         """
         Request the ability to inspect instances.
