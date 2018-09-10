@@ -210,6 +210,20 @@ class IntegrationRequest:
         return bool(self._unit.received['enable-instance-inspection'])
 
     @property
+    def requested_acm_readonly(self):
+        """
+        Flag indicating whether acm readonly was requested.
+        """
+        return bool(self._unit.received['enable-acm-readonly'])
+
+    @property
+    def requested_acm_fullaccess(self):
+        """
+        Flag indicating whether acm fullaccess was requested.
+        """
+        return bool(self._unit.received['enable-acm-fullaccess'])
+
+    @property
     def requested_network_management(self):
         """
         Flag indicating whether the ability to manage networking (firewalls,
