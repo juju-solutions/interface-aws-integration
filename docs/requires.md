@@ -92,6 +92,22 @@ __Parameters__
 
 - __`tags` (dict)__: Mapping of tag names to values (or `None`).
 
+<h2 id="requires.AWSIntegrationRequires.enable_acm_readonly">enable_acm_readonly</h2>
+
+```python
+AWSIntegrationRequires.enable_acm_readonly(self)
+```
+
+Request readonly for ACM.
+
+<h2 id="requires.AWSIntegrationRequires.enable_acm_fullaccess">enable_acm_fullaccess</h2>
+
+```python
+AWSIntegrationRequires.enable_acm_fullaccess(self)
+```
+
+Request fullaccess for ACM.
+
 <h2 id="requires.AWSIntegrationRequires.enable_instance_inspection">enable_instance_inspection</h2>
 
 ```python
