@@ -69,10 +69,15 @@ class AWSIntegrationProvides(Endpoint):
         A list of the new or updated #IntegrationRequests that
         have been made.
         """
-        all_requests = [IntegrationRequest(unit)
-                        for unit in self.all_joined_units]
-        return [request for request in all_requests
-                if request.changed]
+        return [request for request in self.all_requests if request.changed]
+
+    @property
+    def all_requests(self):
+        """
+        A list of all the #IntegrationRequests that have been made,
+        even if unchanged.
+        """
+        return [IntegrationRequest(unit) for unit in self.all_joined_units]
 
     @property
     def application_names(self):
