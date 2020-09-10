@@ -223,7 +223,7 @@ class AWSIntegrationRequires(Endpoint):
         """
         Request the ability to manage DNS.
         """
-        self._request({'enable-dns': True})
+        self._request({'enable-dns-management': True})
 
     def enable_object_storage_access(self, patterns=None):
         """
