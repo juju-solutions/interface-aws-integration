@@ -126,7 +126,10 @@ class AWSIntegrationRequires(Endpoint):
         return self._instance_id
 
     def _imdv2_request(self, url):
-        token_req = Request(self._metadatav2_token_url, headers={"X-aws-ec2-metadata-token-ttl-seconds": "21600"})
+        token_req = Request(
+            self._metadatav2_token_url,
+            headers={"X-aws-ec2-metadata-token-ttl-seconds": "21600"}
+        )
         setattr(token_req, "method", "PUT")
 
         with urlopen(token_req) as fd:
