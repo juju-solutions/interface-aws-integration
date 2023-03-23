@@ -147,7 +147,8 @@ class AWSIntegrationRequires(Endpoint):
             if cached:
                 self._region = cached
             else:
-                with urlopen(self._az_url) as fd:
+                req = self._imdv2_request(self._az_url)
+                with urlopen(req) as fd:
                     az = fd.read(READ_BLOCK_SIZE).decode('utf8')
                     self._region = az.rstrip(string.ascii_lowercase)
                 unitdata.kv().set(cache_key, self._region)
