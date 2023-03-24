@@ -23,7 +23,7 @@ import json
 import string
 from hashlib import sha256
 from urllib.parse import urljoin
-from urllib.request import urlopen
+from urllib.request import urlopen, Request
 
 from charmhelpers.core import unitdata
 
@@ -61,6 +61,7 @@ class AWSIntegrationRequires(Endpoint):
     """
     # the IP is the AWS metadata service, documented here:
     # https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-metadata.html
+    _metadatav2_token_url = 'http://169.254.169.254/latest/api/token'
     _metadata_url = 'http://169.254.169.254/latest/meta-data/'
     _instance_id_url = urljoin(_metadata_url, 'instance-id')
     _az_url = urljoin(_metadata_url, 'placement/availability-zone')
@@ -118,10 +119,22 @@ class AWSIntegrationRequires(Endpoint):
             if cached:
                 self._instance_id = cached
             else:
-                with urlopen(self._instance_id_url) as fd:
+                req = self._imdv2_request(self._instance_id_url)
+                with urlopen(req) as fd:
                     self._instance_id = fd.read(READ_BLOCK_SIZE).decode('utf8')
                 unitdata.kv().set(cache_key, self._instance_id)
         return self._instance_id
+
+    def _imdv2_request(self, url):
+        token_req = Request(
+            self._metadatav2_token_url,
+            headers={"X-aws-ec2-metadata-token-ttl-seconds": "21600"}
+        )
+        setattr(token_req, "method", "PUT")
+
+        with urlopen(token_req) as fd:
+            token = fd.read(READ_BLOCK_SIZE).decode('utf8')
+            return Request(url, headers={"X-aws-ec2-metadata-token": token})
 
     @property
     def region(self):
@@ -134,7 +147,8 @@ class AWSIntegrationRequires(Endpoint):
             if cached:
                 self._region = cached
             else:
-                with urlopen(self._az_url) as fd:
+                req = self._imdv2_request(self._az_url)
+                with urlopen(req) as fd:
                     az = fd.read(READ_BLOCK_SIZE).decode('utf8')
                     self._region = az.rstrip(string.ascii_lowercase)
                 unitdata.kv().set(cache_key, self._region)
