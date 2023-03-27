@@ -59,12 +59,13 @@ class AWSIntegrationRequires(Endpoint):
         update_config_enable_aws()
     ```
     """
+
     # the IP is the AWS metadata service, documented here:
     # https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-metadata.html
-    _metadatav2_token_url = 'http://169.254.169.254/latest/api/token'
-    _metadata_url = 'http://169.254.169.254/latest/meta-data/'
-    _instance_id_url = urljoin(_metadata_url, 'instance-id')
-    _az_url = urljoin(_metadata_url, 'placement/availability-zone')
+    _metadatav2_token_url = "http://169.254.169.254/latest/api/token"
+    _metadata_url = "http://169.254.169.254/latest/meta-data/"
+    _instance_id_url = urljoin(_metadata_url, "instance-id")
+    _az_url = urljoin(_metadata_url, "placement/availability-zone")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -89,24 +90,26 @@ class AWSIntegrationRequires(Endpoint):
         """
         return self.relations[0].to_publish
 
-    @when('endpoint.{endpoint_name}.joined')
+    @when("endpoint.{endpoint_name}.joined")
     def send_instance_info(self):
-        self._to_publish['instance-id'] = self.instance_id
-        self._to_publish['region'] = self.region
+        self._to_publish["instance-id"] = self.instance_id
+        self._to_publish["region"] = self.region
 
-    @when('endpoint.{endpoint_name}.changed')
+    @when("endpoint.{endpoint_name}.changed")
     def check_ready(self):
-        completed = self._received.get('completed', {})
+        completed = self._received.get("completed", {})
         actual_hash = completed.get(self.instance_id)
         # My middle name is ready. No, that doesn't sound right.
         # I eat ready for breakfast.
-        toggle_flag(self.expand_name('ready'),
-                    self._requested and actual_hash == self._expected_hash)
-        clear_flag(self.expand_name('changed'))
+        toggle_flag(
+            self.expand_name("ready"),
+            self._requested and actual_hash == self._expected_hash,
+        )
+        clear_flag(self.expand_name("changed"))
 
-    @when_not('endpoint.{endpoint_name}.joined')
+    @when_not("endpoint.{endpoint_name}.joined")
     def remove_ready(self):
-        clear_flag(self.expand_name('ready'))
+        clear_flag(self.expand_name("ready"))
 
     @property
     def instance_id(self):
@@ -114,26 +117,26 @@ class AWSIntegrationRequires(Endpoint):
         This unit's instance-id.
         """
         if self._instance_id is None:
-            cache_key = self.expand_name('instance-id')
+            cache_key = self.expand_name("instance-id")
             cached = unitdata.kv().get(cache_key)
             if cached:
                 self._instance_id = cached
             else:
                 req = self._imdv2_request(self._instance_id_url)
                 with urlopen(req) as fd:
-                    self._instance_id = fd.read(READ_BLOCK_SIZE).decode('utf8')
+                    self._instance_id = fd.read(READ_BLOCK_SIZE).decode("utf8")
                 unitdata.kv().set(cache_key, self._instance_id)
         return self._instance_id
 
     def _imdv2_request(self, url):
         token_req = Request(
             self._metadatav2_token_url,
-            headers={"X-aws-ec2-metadata-token-ttl-seconds": "21600"}
+            headers={"X-aws-ec2-metadata-token-ttl-seconds": "21600"},
         )
         setattr(token_req, "method", "PUT")
 
         with urlopen(token_req) as fd:
-            token = fd.read(READ_BLOCK_SIZE).decode('utf8')
+            token = fd.read(READ_BLOCK_SIZE).decode("utf8")
             return Request(url, headers={"X-aws-ec2-metadata-token": token})
 
     @property
@@ -142,32 +145,33 @@ class AWSIntegrationRequires(Endpoint):
         The region this unit is in.
         """
         if self._region is None:
-            cache_key = self.expand_name('region')
+            cache_key = self.expand_name("region")
             cached = unitdata.kv().get(cache_key)
             if cached:
                 self._region = cached
             else:
                 req = self._imdv2_request(self._az_url)
                 with urlopen(req) as fd:
-                    az = fd.read(READ_BLOCK_SIZE).decode('utf8')
+                    az = fd.read(READ_BLOCK_SIZE).decode("utf8")
                     self._region = az.rstrip(string.ascii_lowercase)
                 unitdata.kv().set(cache_key, self._region)
         return self._region
 
     @property
     def _expected_hash(self):
-        return sha256(json.dumps(dict(self._to_publish),
-                                 sort_keys=True).encode('utf8')).hexdigest()
+        return sha256(
+            json.dumps(dict(self._to_publish), sort_keys=True).encode("utf8")
+        ).hexdigest()
 
     @property
     def _requested(self):
         # whether or not a request has been issued
-        return self._to_publish['requested']
+        return self._to_publish["requested"]
 
     def _request(self, keyvals):
         self._to_publish.update(keyvals)
-        self._to_publish['requested'] = True
-        clear_flag(self.expand_name('ready'))
+        self._to_publish["requested"] = True
+        clear_flag(self.expand_name("ready"))
 
     def tag_instance(self, tags):
         """
@@ -176,7 +180,7 @@ class AWSIntegrationRequires(Endpoint):
         # Parameters
         `tags` (dict): Mapping of tag names to values (or `None`).
         """
-        self._request({'instance-tags': dict(tags)})
+        self._request({"instance-tags": dict(tags)})
 
     def tag_instance_security_group(self, tags):
         """
@@ -186,7 +190,7 @@ class AWSIntegrationRequires(Endpoint):
         # Parameters
         `tags` (dict): Mapping of tag names to values (or `None`).
         """
-        self._request({'instance-security-group-tags': dict(tags)})
+        self._request({"instance-security-group-tags": dict(tags)})
 
     def tag_instance_subnet(self, tags):
         """
@@ -195,49 +199,49 @@ class AWSIntegrationRequires(Endpoint):
         # Parameters
         `tags` (dict): Mapping of tag names to values (or `None`).
         """
-        self._request({'instance-subnet-tags': dict(tags)})
+        self._request({"instance-subnet-tags": dict(tags)})
 
     def enable_acm_readonly(self):
         """
         Request readonly for ACM.
         """
-        self._request({'enable-acm-readonly': True})
+        self._request({"enable-acm-readonly": True})
 
     def enable_acm_fullaccess(self):
         """
         Request fullaccess for ACM.
         """
-        self._request({'enable-acm-fullaccess': True})
+        self._request({"enable-acm-fullaccess": True})
 
     def enable_instance_inspection(self):
         """
         Request the ability to inspect instances.
         """
-        self._request({'enable-instance-inspection': True})
+        self._request({"enable-instance-inspection": True})
 
     def enable_network_management(self):
         """
         Request the ability to manage networking (firewalls, subnets, etc).
         """
-        self._request({'enable-network-management': True})
+        self._request({"enable-network-management": True})
 
     def enable_load_balancer_management(self):
         """
         Request the ability to manage load balancers.
         """
-        self._request({'enable-load-balancer-management': True})
+        self._request({"enable-load-balancer-management": True})
 
     def enable_block_storage_management(self):
         """
         Request the ability to manage block storage.
         """
-        self._request({'enable-block-storage-management': True})
+        self._request({"enable-block-storage-management": True})
 
     def enable_dns_management(self):
         """
         Request the ability to manage DNS.
         """
-        self._request({'enable-dns-management': True})
+        self._request({"enable-dns-management": True})
 
     def enable_object_storage_access(self, patterns=None):
         """
@@ -250,12 +254,14 @@ class AWSIntegrationRequires(Endpoint):
         """
         if patterns:
             for i, pattern in enumerate(patterns):
-                if not pattern.startswith('arn:aws:s3:::'):
-                    patterns[i] = 'arn:aws:s3:::{}'.format(pattern)
-        self._request({
-            'enable-object-storage-access': True,
-            'object-storage-access-patterns': patterns,
-        })
+                if not pattern.startswith("arn:aws:s3:::"):
+                    patterns[i] = "arn:aws:s3:::{}".format(pattern)
+        self._request(
+            {
+                "enable-object-storage-access": True,
+                "object-storage-access-patterns": patterns,
+            }
+        )
 
     def enable_object_storage_management(self, patterns=None):
         """
@@ -268,9 +274,11 @@ class AWSIntegrationRequires(Endpoint):
         """
         if patterns:
             for i, pattern in enumerate(patterns):
-                if not pattern.startswith('arn:aws:s3:::'):
-                    patterns[i] = 'arn:aws:s3:::{}'.format(pattern)
-        self._request({
-            'enable-object-storage-management': True,
-            'object-storage-management-patterns': patterns,
-        })
+                if not pattern.startswith("arn:aws:s3:::"):
+                    patterns[i] = "arn:aws:s3:::{}".format(pattern)
+        self._request(
+            {
+                "enable-object-storage-management": True,
+                "object-storage-management-patterns": patterns,
+            }
+        )
