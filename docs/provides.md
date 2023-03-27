@@ -1,5 +1,6 @@
-<h1 id="provides">provides</h1>
+<a id="provides"></a>
 
+# provides
 
 This is the provides side of the interface layer, for use only by the AWS
 integrator charm itself.
@@ -12,10 +13,12 @@ The flags that are set by the provides side of this interface are:
   whatever actions are necessary to satisfy those requests, and then mark
   them as complete.
 
-<h1 id="provides.AWSIntegrationProvides">AWSIntegrationProvides</h1>
+<a id="provides.AWSIntegrationProvides"></a>
+
+## AWSIntegrationProvides Objects
 
 ```python
-AWSIntegrationProvides(self, endpoint_name, relation_ids=None)
+class AWSIntegrationProvides(Endpoint)
 ```
 
 Example usage:
@@ -43,137 +46,303 @@ def handle_requests():
         request.mark_completed()
 ```
 
-<h2 id="provides.AWSIntegrationProvides.application_names">application_names</h2>
+<a id="provides.AWSIntegrationProvides.requests"></a>
 
+#### requests
+
+```python
+@property
+def requests()
+```
+
+A list of the new or updated [`IntegrationRequest`](#provides.IntegrationRequest) objects that
+have been made.
+
+<a id="provides.AWSIntegrationProvides.all_requests"></a>
+
+#### all\_requests
+
+```python
+@property
+def all_requests()
+```
+
+A list of all the [`IntegrationRequest`](#provides.IntegrationRequest) objects that have been made,
+even if unchanged.
+
+<a id="provides.AWSIntegrationProvides.application_names"></a>
+
+#### application\_names
+
+```python
+@property
+def application_names()
+```
 
 Set of names of all applications that are still joined.
 
-<h2 id="provides.AWSIntegrationProvides.requests">requests</h2>
+<a id="provides.AWSIntegrationProvides.unit_instances"></a>
 
+#### unit\_instances
 
-A list of the new or updated `IntegrationRequests` that
-have been made.
-
-<h2 id="provides.AWSIntegrationProvides.unit_instances">unit_instances</h2>
-
+```python
+@property
+def unit_instances()
+```
 
 Mapping of unit names to instance IDs and regions for all joined units.
 
-<h1 id="provides.IntegrationRequest">IntegrationRequest</h1>
+<a id="provides.IntegrationRequest"></a>
+
+## IntegrationRequest Objects
 
 ```python
-IntegrationRequest(self, unit)
+class IntegrationRequest()
 ```
 
 A request for integration from a single remote unit.
 
-<h2 id="provides.IntegrationRequest.application_name">application_name</h2>
+<a id="provides.IntegrationRequest.hash"></a>
 
+#### hash
 
-The name of the application making the request.
+```python
+@property
+def hash()
+```
 
-<h2 id="provides.IntegrationRequest.changed">changed</h2>
+SHA hash of the data for this request.
 
+<a id="provides.IntegrationRequest.changed"></a>
+
+#### changed
+
+```python
+@property
+def changed()
+```
 
 Whether this request has changed since the last time it was
 marked completed.
 
-<h2 id="provides.IntegrationRequest.hash">hash</h2>
+<a id="provides.IntegrationRequest.mark_completed"></a>
 
-
-SHA hash of the data for this request.
-
-<h2 id="provides.IntegrationRequest.instance_id">instance_id</h2>
-
-
-The instance ID reported for this request.
-
-<h2 id="provides.IntegrationRequest.instance_security_group_tags">instance_security_group_tags</h2>
-
-
-Mapping of tag names to values (or `None`) to apply to this instance's
-machine-specific security group (firewall).
-
-<h2 id="provides.IntegrationRequest.instance_subnet_tags">instance_subnet_tags</h2>
-
-
-Mapping of tag names to values (or `None`) to apply to this instance's
-subnet.
-
-<h2 id="provides.IntegrationRequest.instance_tags">instance_tags</h2>
-
-
-Mapping of tag names to values (or `None`) to apply to this instance.
-
-<h2 id="provides.IntegrationRequest.object_storage_access_patterns">object_storage_access_patterns</h2>
-
-
-List of patterns to which to restrict object storage access.
-
-<h2 id="provides.IntegrationRequest.object_storage_management_patterns">object_storage_management_patterns</h2>
-
-
-List of patterns to which to restrict object storage management.
-
-<h2 id="provides.IntegrationRequest.region">region</h2>
-
-
-The region reported for this request.
-
-<h2 id="provides.IntegrationRequest.requested_block_storage_management">requested_block_storage_management</h2>
-
-
-Flag indicating whether block storage management was requested.
-
-<h2 id="provides.IntegrationRequest.requested_dns_management">requested_dns_management</h2>
-
-
-Flag indicating whether DNS management was requested.
-
-<h2 id="provides.IntegrationRequest.requested_instance_inspection">requested_instance_inspection</h2>
-
-
-Flag indicating whether the ability to inspect instances was requested.
-
-<h2 id="provides.IntegrationRequest.requested_load_balancer_management">requested_load_balancer_management</h2>
-
-
-Flag indicating whether load balancer management was requested.
-
-<h2 id="provides.IntegrationRequest.requested_network_management">requested_network_management</h2>
-
-
-Flag indicating whether the ability to manage networking (firewalls,
-subnets, etc) was requested.
-
-<h2 id="provides.IntegrationRequest.requested_object_storage_access">requested_object_storage_access</h2>
-
-
-Flag indicating whether object storage access was requested.
-
-<h2 id="provides.IntegrationRequest.requested_object_storage_management">requested_object_storage_management</h2>
-
-
-Flag indicating whether object storage management was requested.
-
-<h2 id="provides.IntegrationRequest.unit_name">unit_name</h2>
-
-
-The name of the unit making the request.
-
-<h2 id="provides.IntegrationRequest.mark_completed">mark_completed</h2>
+#### mark\_completed
 
 ```python
-IntegrationRequest.mark_completed(self)
+def mark_completed()
 ```
 
 Mark this request as having been completed.
 
-<h2 id="provides.IntegrationRequest.clear">clear</h2>
+<a id="provides.IntegrationRequest.clear"></a>
+
+#### clear
 
 ```python
-IntegrationRequest.clear(self)
+def clear()
 ```
 
 Clear this request's cached data.
+
+<a id="provides.IntegrationRequest.unit_name"></a>
+
+#### unit\_name
+
+```python
+@property
+def unit_name()
+```
+
+The name of the unit making the request.
+
+<a id="provides.IntegrationRequest.application_name"></a>
+
+#### application\_name
+
+```python
+@property
+def application_name()
+```
+
+The name of the application making the request.
+
+<a id="provides.IntegrationRequest.instance_id"></a>
+
+#### instance\_id
+
+```python
+@property
+def instance_id()
+```
+
+The instance ID reported for this request.
+
+<a id="provides.IntegrationRequest.region"></a>
+
+#### region
+
+```python
+@property
+def region()
+```
+
+The region reported for this request.
+
+<a id="provides.IntegrationRequest.instance_tags"></a>
+
+#### instance\_tags
+
+```python
+@property
+def instance_tags()
+```
+
+Mapping of tag names to values (or `None`) to apply to this instance.
+
+<a id="provides.IntegrationRequest.instance_security_group_tags"></a>
+
+#### instance\_security\_group\_tags
+
+```python
+@property
+def instance_security_group_tags()
+```
+
+Mapping of tag names to values (or `None`) to apply to this instance's
+machine-specific security group (firewall).
+
+<a id="provides.IntegrationRequest.instance_subnet_tags"></a>
+
+#### instance\_subnet\_tags
+
+```python
+@property
+def instance_subnet_tags()
+```
+
+Mapping of tag names to values (or `None`) to apply to this instance's
+subnet.
+
+<a id="provides.IntegrationRequest.requested_instance_inspection"></a>
+
+#### requested\_instance\_inspection
+
+```python
+@property
+def requested_instance_inspection()
+```
+
+Flag indicating whether the ability to inspect instances was requested.
+
+<a id="provides.IntegrationRequest.requested_acm_readonly"></a>
+
+#### requested\_acm\_readonly
+
+```python
+@property
+def requested_acm_readonly()
+```
+
+Flag indicating whether acm readonly was requested.
+
+<a id="provides.IntegrationRequest.requested_acm_fullaccess"></a>
+
+#### requested\_acm\_fullaccess
+
+```python
+@property
+def requested_acm_fullaccess()
+```
+
+Flag indicating whether acm fullaccess was requested.
+
+<a id="provides.IntegrationRequest.requested_network_management"></a>
+
+#### requested\_network\_management
+
+```python
+@property
+def requested_network_management()
+```
+
+Flag indicating whether the ability to manage networking (firewalls,
+subnets, etc) was requested.
+
+<a id="provides.IntegrationRequest.requested_load_balancer_management"></a>
+
+#### requested\_load\_balancer\_management
+
+```python
+@property
+def requested_load_balancer_management()
+```
+
+Flag indicating whether load balancer management was requested.
+
+<a id="provides.IntegrationRequest.requested_block_storage_management"></a>
+
+#### requested\_block\_storage\_management
+
+```python
+@property
+def requested_block_storage_management()
+```
+
+Flag indicating whether block storage management was requested.
+
+<a id="provides.IntegrationRequest.requested_dns_management"></a>
+
+#### requested\_dns\_management
+
+```python
+@property
+def requested_dns_management()
+```
+
+Flag indicating whether DNS management was requested.
+
+<a id="provides.IntegrationRequest.requested_object_storage_access"></a>
+
+#### requested\_object\_storage\_access
+
+```python
+@property
+def requested_object_storage_access()
+```
+
+Flag indicating whether object storage access was requested.
+
+<a id="provides.IntegrationRequest.object_storage_access_patterns"></a>
+
+#### object\_storage\_access\_patterns
+
+```python
+@property
+def object_storage_access_patterns()
+```
+
+List of patterns to which to restrict object storage access.
+
+<a id="provides.IntegrationRequest.requested_object_storage_management"></a>
+
+#### requested\_object\_storage\_management
+
+```python
+@property
+def requested_object_storage_management()
+```
+
+Flag indicating whether object storage management was requested.
+
+<a id="provides.IntegrationRequest.object_storage_management_patterns"></a>
+
+#### object\_storage\_management\_patterns
+
+```python
+@property
+def object_storage_management_patterns()
+```
+
+List of patterns to which to restrict object storage management.
 

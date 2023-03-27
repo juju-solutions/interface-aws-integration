@@ -49,24 +49,24 @@ class AWSIntegrationProvides(Endpoint):
     ```
     """
 
-    @when('endpoint.{endpoint_name}.changed')
+    @when("endpoint.{endpoint_name}.changed")
     def check_requests(self):
         requests = self.requests
-        toggle_flag(self.expand_name('requested'), len(requests) > 0)
-        clear_flag(self.expand_name('changed'))
+        toggle_flag(self.expand_name("requested"), len(requests) > 0)
+        clear_flag(self.expand_name("changed"))
 
-    @when('endpoint.{endpoint_name}.departed')
+    @when("endpoint.{endpoint_name}.departed")
     def cleanup(self):
         for unit in self.all_departed_units:
             request = IntegrationRequest(unit)
             request.clear()
         self.all_departed_units.clear()
-        clear_flag(self.expand_name('departed'))
+        clear_flag(self.expand_name("departed"))
 
     @property
     def requests(self):
         """
-        A list of the new or updated #IntegrationRequests that
+        A list of the new or updated #IntegrationRequest objects that
         have been made.
         """
         return [request for request in self.all_requests if request.changed]
@@ -74,7 +74,7 @@ class AWSIntegrationProvides(Endpoint):
     @property
     def all_requests(self):
         """
-        A list of all the #IntegrationRequests that have been made,
+        A list of all the #IntegrationRequest objects that have been made,
         even if unchanged.
         """
         return [IntegrationRequest(unit) for unit in self.all_joined_units]
@@ -93,9 +93,10 @@ class AWSIntegrationProvides(Endpoint):
         """
         return {
             unit.unit_name: {
-                'instance-id': unit.received['instance-id'],
-                'region': unit.received['region'],
-            } for unit in self.all_joined_units
+                "instance-id": unit.received["instance-id"],
+                "region": unit.received["region"],
+            }
+            for unit in self.all_joined_units
         }
 
 
@@ -103,11 +104,12 @@ class IntegrationRequest:
     """
     A request for integration from a single remote unit.
     """
+
     def __init__(self, unit):
         self._unit = unit
-        self._hash = sha256(json.dumps(dict(unit.received),
-                                       sort_keys=True).encode('utf8')
-                            ).hexdigest()
+        self._hash = sha256(
+            json.dumps(dict(unit.received), sort_keys=True).encode("utf8")
+        ).hexdigest()
 
     @property
     def hash(self):
@@ -119,7 +121,7 @@ class IntegrationRequest:
     @property
     def _hash_key(self):
         endpoint = self._unit.relation.endpoint
-        return endpoint.expand_name('request.{}'.format(self.instance_id))
+        return endpoint.expand_name("request.{}".format(self.instance_id))
 
     @property
     def changed(self):
@@ -137,10 +139,10 @@ class IntegrationRequest:
         """
         Mark this request as having been completed.
         """
-        completed = self._unit.relation.to_publish.get('completed', {})
+        completed = self._unit.relation.to_publish.get("completed", {})
         completed[self.instance_id] = self.hash
         unitdata.kv().set(self._hash_key, self.hash)
-        self._unit.relation.to_publish['completed'] = completed
+        self._unit.relation.to_publish["completed"] = completed
 
     def clear(self):
         """
@@ -164,21 +166,21 @@ class IntegrationRequest:
 
     @property
     def _requested(self):
-        return self._unit.received['requested']
+        return self._unit.received["requested"]
 
     @property
     def instance_id(self):
         """
         The instance ID reported for this request.
         """
-        return self._unit.received['instance-id']
+        return self._unit.received["instance-id"]
 
     @property
     def region(self):
         """
         The region reported for this request.
         """
-        return self._unit.received['region']
+        return self._unit.received["region"]
 
     @property
     def instance_tags(self):
@@ -186,7 +188,7 @@ class IntegrationRequest:
         Mapping of tag names to values (or `None`) to apply to this instance.
         """
         # uses dict() here to make a copy, just to be safe
-        return dict(self._unit.received.get('instance-tags', {}))
+        return dict(self._unit.received.get("instance-tags", {}))
 
     @property
     def instance_security_group_tags(self):
@@ -195,8 +197,7 @@ class IntegrationRequest:
         machine-specific security group (firewall).
         """
         # uses dict() here to make a copy, just to be safe
-        return dict(self._unit.received.get('instance-security-group-tags',
-                                            {}))
+        return dict(self._unit.received.get("instance-security-group-tags", {}))
 
     @property
     def instance_subnet_tags(self):
@@ -205,14 +206,14 @@ class IntegrationRequest:
         subnet.
         """
         # uses dict() here to make a copy, just to be safe
-        return dict(self._unit.received.get('instance-subnet-tags', {}))
+        return dict(self._unit.received.get("instance-subnet-tags", {}))
 
     @property
     def requested_instance_inspection(self):
         """
         Flag indicating whether the ability to inspect instances was requested.
         """
-        return bool(self._unit.received['enable-instance-inspection'])
+        return bool(self._unit.received["enable-instance-inspection"])
 
     @property
     def requested_instance_modification(self):
@@ -233,14 +234,14 @@ class IntegrationRequest:
         """
         Flag indicating whether acm readonly was requested.
         """
-        return bool(self._unit.received['enable-acm-readonly'])
+        return bool(self._unit.received["enable-acm-readonly"])
 
     @property
     def requested_acm_fullaccess(self):
         """
         Flag indicating whether acm fullaccess was requested.
         """
-        return bool(self._unit.received['enable-acm-fullaccess'])
+        return bool(self._unit.received["enable-acm-fullaccess"])
 
     @property
     def requested_network_management(self):
@@ -248,28 +249,28 @@ class IntegrationRequest:
         Flag indicating whether the ability to manage networking (firewalls,
         subnets, etc) was requested.
         """
-        return bool(self._unit.received['enable-network-management'])
+        return bool(self._unit.received["enable-network-management"])
 
     @property
     def requested_load_balancer_management(self):
         """
         Flag indicating whether load balancer management was requested.
         """
-        return bool(self._unit.received['enable-load-balancer-management'])
+        return bool(self._unit.received["enable-load-balancer-management"])
 
     @property
     def requested_block_storage_management(self):
         """
         Flag indicating whether block storage management was requested.
         """
-        return bool(self._unit.received['enable-block-storage-management'])
+        return bool(self._unit.received["enable-block-storage-management"])
 
     @property
     def requested_dns_management(self):
         """
         Flag indicating whether DNS management was requested.
         """
-        return bool(self._unit.received['enable-dns-management'])
+        return bool(self._unit.received["enable-dns-management"])
 
     @property
     def requested_region_readonly(self):
@@ -283,27 +284,25 @@ class IntegrationRequest:
         """
         Flag indicating whether object storage access was requested.
         """
-        return bool(self._unit.received['enable-object-storage-access'])
+        return bool(self._unit.received["enable-object-storage-access"])
 
     @property
     def object_storage_access_patterns(self):
         """
         List of patterns to which to restrict object storage access.
         """
-        return list(
-            self._unit.received['object-storage-access-patterns'] or [])
+        return list(self._unit.received["object-storage-access-patterns"] or [])
 
     @property
     def requested_object_storage_management(self):
         """
         Flag indicating whether object storage management was requested.
         """
-        return bool(self._unit.received['enable-object-storage-management'])
+        return bool(self._unit.received["enable-object-storage-management"])
 
     @property
     def object_storage_management_patterns(self):
         """
         List of patterns to which to restrict object storage management.
         """
-        return list(
-            self._unit.received['object-storage-management-patterns'] or [])
+        return list(self._unit.received["object-storage-management-patterns"] or [])

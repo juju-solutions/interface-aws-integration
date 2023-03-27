@@ -1,5 +1,6 @@
-<h1 id="requires">requires</h1>
+<a id="requires"></a>
 
+# requires
 
 This is the requires side of the interface layer, for use in charms that
 wish to request integration with AWS native features.  The integration will
@@ -19,10 +20,12 @@ The flags that are set by the requires side of this interface are:
   running.  This flag is automatically removed if new integration features
   are requested.  It should not be removed by the charm.
 
-<h1 id="requires.AWSIntegrationRequires">AWSIntegrationRequires</h1>
+<a id="requires.AWSIntegrationRequires"></a>
+
+## AWSIntegrationRequires Objects
 
 ```python
-AWSIntegrationRequires(self, *args, **kwargs)
+class AWSIntegrationRequires(Endpoint)
 ```
 
 Example usage:
@@ -45,20 +48,34 @@ def aws_integration_ready():
     update_config_enable_aws()
 ```
 
-<h2 id="requires.AWSIntegrationRequires.instance_id">instance_id</h2>
+<a id="requires.AWSIntegrationRequires.instance_id"></a>
 
+#### instance\_id
+
+```python
+@property
+def instance_id()
+```
 
 This unit's instance-id.
 
-<h2 id="requires.AWSIntegrationRequires.region">region</h2>
+<a id="requires.AWSIntegrationRequires.region"></a>
 
+#### region
+
+```python
+@property
+def region()
+```
 
 The region this unit is in.
 
-<h2 id="requires.AWSIntegrationRequires.tag_instance">tag_instance</h2>
+<a id="requires.AWSIntegrationRequires.tag_instance"></a>
+
+#### tag\_instance
 
 ```python
-AWSIntegrationRequires.tag_instance(self, tags)
+def tag_instance(tags)
 ```
 
 Request that the given tags be applied to this instance.
@@ -67,10 +84,12 @@ __Parameters__
 
 - __`tags` (dict)__: Mapping of tag names to values (or `None`).
 
-<h2 id="requires.AWSIntegrationRequires.tag_instance_security_group">tag_instance_security_group</h2>
+<a id="requires.AWSIntegrationRequires.tag_instance_security_group"></a>
+
+#### tag\_instance\_security\_group
 
 ```python
-AWSIntegrationRequires.tag_instance_security_group(self, tags)
+def tag_instance_security_group(tags)
 ```
 
 Request that the given tags be applied to this instance's
@@ -80,10 +99,12 @@ __Parameters__
 
 - __`tags` (dict)__: Mapping of tag names to values (or `None`).
 
-<h2 id="requires.AWSIntegrationRequires.tag_instance_subnet">tag_instance_subnet</h2>
+<a id="requires.AWSIntegrationRequires.tag_instance_subnet"></a>
+
+#### tag\_instance\_subnet
 
 ```python
-AWSIntegrationRequires.tag_instance_subnet(self, tags)
+def tag_instance_subnet(tags)
 ```
 
 Request that the given tags be applied to this instance's subnet.
@@ -92,66 +113,82 @@ __Parameters__
 
 - __`tags` (dict)__: Mapping of tag names to values (or `None`).
 
-<h2 id="requires.AWSIntegrationRequires.enable_acm_readonly">enable_acm_readonly</h2>
+<a id="requires.AWSIntegrationRequires.enable_acm_readonly"></a>
+
+#### enable\_acm\_readonly
 
 ```python
-AWSIntegrationRequires.enable_acm_readonly(self)
+def enable_acm_readonly()
 ```
 
 Request readonly for ACM.
 
-<h2 id="requires.AWSIntegrationRequires.enable_acm_fullaccess">enable_acm_fullaccess</h2>
+<a id="requires.AWSIntegrationRequires.enable_acm_fullaccess"></a>
+
+#### enable\_acm\_fullaccess
 
 ```python
-AWSIntegrationRequires.enable_acm_fullaccess(self)
+def enable_acm_fullaccess()
 ```
 
 Request fullaccess for ACM.
 
-<h2 id="requires.AWSIntegrationRequires.enable_instance_inspection">enable_instance_inspection</h2>
+<a id="requires.AWSIntegrationRequires.enable_instance_inspection"></a>
+
+#### enable\_instance\_inspection
 
 ```python
-AWSIntegrationRequires.enable_instance_inspection(self)
+def enable_instance_inspection()
 ```
 
 Request the ability to inspect instances.
 
-<h2 id="requires.AWSIntegrationRequires.enable_network_management">enable_network_management</h2>
+<a id="requires.AWSIntegrationRequires.enable_network_management"></a>
+
+#### enable\_network\_management
 
 ```python
-AWSIntegrationRequires.enable_network_management(self)
+def enable_network_management()
 ```
 
 Request the ability to manage networking (firewalls, subnets, etc).
 
-<h2 id="requires.AWSIntegrationRequires.enable_load_balancer_management">enable_load_balancer_management</h2>
+<a id="requires.AWSIntegrationRequires.enable_load_balancer_management"></a>
+
+#### enable\_load\_balancer\_management
 
 ```python
-AWSIntegrationRequires.enable_load_balancer_management(self)
+def enable_load_balancer_management()
 ```
 
 Request the ability to manage load balancers.
 
-<h2 id="requires.AWSIntegrationRequires.enable_block_storage_management">enable_block_storage_management</h2>
+<a id="requires.AWSIntegrationRequires.enable_block_storage_management"></a>
+
+#### enable\_block\_storage\_management
 
 ```python
-AWSIntegrationRequires.enable_block_storage_management(self)
+def enable_block_storage_management()
 ```
 
 Request the ability to manage block storage.
 
-<h2 id="requires.AWSIntegrationRequires.enable_dns_management">enable_dns_management</h2>
+<a id="requires.AWSIntegrationRequires.enable_dns_management"></a>
+
+#### enable\_dns\_management
 
 ```python
-AWSIntegrationRequires.enable_dns_management(self)
+def enable_dns_management()
 ```
 
 Request the ability to manage DNS.
 
-<h2 id="requires.AWSIntegrationRequires.enable_object_storage_access">enable_object_storage_access</h2>
+<a id="requires.AWSIntegrationRequires.enable_object_storage_access"></a>
+
+#### enable\_object\_storage\_access
 
 ```python
-AWSIntegrationRequires.enable_object_storage_access(self, patterns=None)
+def enable_object_storage_access(patterns=None)
 ```
 
 Request the ability to access object storage.
@@ -162,10 +199,12 @@ __Parameters__
     the patterns. If patterns do not start with the S3 ARN prefix
 - __(`arn__:aws:s3:::`), it will be prepended.
 
-<h2 id="requires.AWSIntegrationRequires.enable_object_storage_management">enable_object_storage_management</h2>
+<a id="requires.AWSIntegrationRequires.enable_object_storage_management"></a>
+
+#### enable\_object\_storage\_management
 
 ```python
-AWSIntegrationRequires.enable_object_storage_management(self, patterns=None)
+def enable_object_storage_management(patterns=None)
 ```
 
 Request the ability to manage object storage.
