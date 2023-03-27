@@ -217,7 +217,7 @@ class AWSIntegrationRequires(Endpoint):
         """
         Request readonly access for autoscaling.
         """
-        self._request({'enable-autoscaling-readonly': True})
+        self._request({"enable-autoscaling-readonly": True})
 
     def enable_instance_inspection(self):
         """
@@ -229,7 +229,7 @@ class AWSIntegrationRequires(Endpoint):
         """
         Request the ability to modify instances.
         """
-        self._request({'enable-instance-modification': True})
+        self._request({"enable-instance-modification": True})
 
     def enable_network_management(self):
         """
@@ -259,7 +259,7 @@ class AWSIntegrationRequires(Endpoint):
         """
         Request the ability to read region features.
         """
-        self._request({'enable-region-readonly': True})
+        self._request({"enable-region-readonly": True})
 
     def enable_object_storage_access(self, patterns=None):
         """
