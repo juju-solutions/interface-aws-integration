@@ -216,6 +216,20 @@ class IntegrationRequest:
         return bool(self._unit.received["enable-instance-inspection"])
 
     @property
+    def requested_instance_modification(self):
+        """
+        Flag indicating whether the ability to modify instances was requested.
+        """
+        return bool(self._unit.received["enable-instance-modification"])
+
+    @property
+    def requested_autoscaling_readonly(self):
+        """
+        Flag indicating whether autoscaling read-attributes are requested.
+        """
+        return bool(self._unit.received["enable-autoscaling-readonly"])
+
+    @property
     def requested_acm_readonly(self):
         """
         Flag indicating whether acm readonly was requested.
@@ -257,6 +271,13 @@ class IntegrationRequest:
         Flag indicating whether DNS management was requested.
         """
         return bool(self._unit.received["enable-dns-management"])
+
+    @property
+    def requested_region_readonly(self):
+        """
+        Flag indicating whether Region readonly management was requested.
+        """
+        return bool(self._unit.received["enable-region-readonly"])
 
     @property
     def requested_object_storage_access(self):

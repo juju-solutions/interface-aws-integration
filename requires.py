@@ -213,11 +213,23 @@ class AWSIntegrationRequires(Endpoint):
         """
         self._request({"enable-acm-fullaccess": True})
 
+    def enable_autoscaling_readonly(self):
+        """
+        Request readonly access for autoscaling.
+        """
+        self._request({"enable-autoscaling-readonly": True})
+
     def enable_instance_inspection(self):
         """
         Request the ability to inspect instances.
         """
         self._request({"enable-instance-inspection": True})
+
+    def enable_instance_modification(self):
+        """
+        Request the ability to modify instances.
+        """
+        self._request({"enable-instance-modification": True})
 
     def enable_network_management(self):
         """
@@ -242,6 +254,12 @@ class AWSIntegrationRequires(Endpoint):
         Request the ability to manage DNS.
         """
         self._request({"enable-dns-management": True})
+
+    def enable_region_readonly(self):
+        """
+        Request the ability to read region features.
+        """
+        self._request({"enable-region-readonly": True})
 
     def enable_object_storage_access(self, patterns=None):
         """
