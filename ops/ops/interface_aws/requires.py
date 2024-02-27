@@ -1,84 +1,101 @@
+# Copyright 2024 Canonical Ltd.
+# See LICENSE file for licensing details.
+"""Implementation of aws interface.
+
+This only implements the requires side, currently, since the providers
+is still using the Reactive Charm framework self.
 """
-This is the requires side of the interface layer, for use in charms that
-wish to request integration with AWS native features.  The integration will
-be provided by the AWS integration charm, which allows the requiring charm
-to not require cloud credentials itself and not have a lot of AWS specific
-API code.
-
-The flags that are set by the requires side of this interface are:
-
-* **`endpoint.{endpoint_name}.joined`** This flag is set when the relation
-  has been joined, and the charm should then use the methods documented below
-  to request specific AWS features.  This flag is automatically removed if
-  the relation is broken.  It should not be removed by the charm.
-
-* **`endpoint.{endpoint_name}.ready`** This flag is set once the requested
-  features have been enabled for the AWS instance on which the charm is
-  running.  This flag is automatically removed if new integration features
-  are requested.  It should not be removed by the charm.
-"""
-
 import json
-import string
 from hashlib import sha256
+import logging
+import ops
+import string
+from functools import cached_property
+from typing import  Mapping, Optional
 from urllib.parse import urljoin
 from urllib.request import urlopen, Request
 
-from charmhelpers.core import unitdata
 
-from charms.reactive import Endpoint
-from charms.reactive import when, when_not
-from charms.reactive import clear_flag, toggle_flag
-
+log = logging.getLogger(__name__)
 
 # block size to read data from AWS metadata service
 # (realistically, just needs to be bigger than ~20 chars)
 READ_BLOCK_SIZE = 2048
 
+# the IP is the AWS metadata service, documented here:
+# https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-metadata.html
+_METADATAV2_TOKEN_URL = "http://169.254.169.254/latest/api/token"
+_METADATA_URL = "http://169.254.169.254/latest/meta-data/"
+_INSTANCE_ID_URL = urljoin(_METADATA_URL, "instance-id")
+_AZ_URL = urljoin(_METADATA_URL, "placement/availability-zone")
 
-class AWSIntegrationRequires(Endpoint):
-    """
+def _imdv2_request(url):
+    token_req = Request(
+        _METADATAV2_TOKEN_URL,
+        headers={"X-aws-ec2-metadata-token-ttl-seconds": "21600"},
+    )
+    setattr(token_req, "method", "PUT")
+
+    with urlopen(token_req) as fd:
+        token = fd.read(READ_BLOCK_SIZE).decode("utf8")
+        return Request(url, headers={"X-aws-ec2-metadata-token": token})
+
+
+class AWSIntegrationRequires(ops.Object):
+    """Requires side of aws relation.
+
     Example usage:
 
     ```python
-    from charms.reactive import when, endpoint_from_flag
 
-    @when('endpoint.aws.joined')
-    def request_aws_integration():
-        aws = endpoint_from_flag('endpoint.aws.joined')
-        aws.request_instance_tags({
-            'tag1': 'value1',
-            'tag2': None,
-        })
-        aws.request_load_balancer_management()
-        # ...
+    class MyCharm(ops.CharmBase):
 
-    @when('endpoint.aws.ready')
-    def aws_integration_ready():
-        update_config_enable_aws()
-    ```
+        def __init__(self, *args):
+            super().__init__(*args)
+            self.aws = AwsIntegrationRequires(self)
+            ...
+    
+        def request_aws_integration():
+            self.aws.request_instance_tags({
+                'tag1': 'value1',
+                'tag2': None,
+            })
+            aws.request_load_balancer_management()
+            # ...
+
+        def check_aws_integration():
+            if self.aws.is_ready():
+                update_config_enable_aws()
+        ```
     """
 
-    # the IP is the AWS metadata service, documented here:
-    # https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-metadata.html
-    _metadatav2_token_url = "http://169.254.169.254/latest/api/token"
-    _metadata_url = "http://169.254.169.254/latest/meta-data/"
-    _instance_id_url = urljoin(_metadata_url, "instance-id")
-    _az_url = urljoin(_metadata_url, "placement/availability-zone")
+    _stored = ops.StoredState()
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._instance_id = None
-        self._region = None
+    def __init__(self, charm: ops.CharmBase, endpoint="aws"):
+        super().__init__(charm, f"relation-{endpoint}")
+        self.endpoint = endpoint
+        self.charm =charm
+        
+        events = charm.on[endpoint]
+        self.framework.observe(events.relation_joined, self._joined)
+        self._stored.set_default(instance_id=None,region=None)
 
     @property
-    def _received(self):
+    def relation(self) -> Optional[ops.Relation]:
+        """The relation to the integrator, or None."""
+        relations = self.charm.model.relations.get(self.endpoint)
+        return relations[0] if relations else None
+
+    @property
+    def _received(self) -> Mapping[str,str]:
         """
         Helper to streamline access to received data since we expect to only
         ever be connected to a single AWS integration application with a
         single unit.
         """
-        return self.relations[0].joined_units.received
+        if self.relation and self.relation.units:
+            return self.relation.data[list(self.relation.units)[0]]
+        return {}
 
     @property
     def _to_publish(self):
@@ -87,74 +104,50 @@ class AWSIntegrationRequires(Endpoint):
         ever be connected to a single AWS integration application with a
         single unit.
         """
-        return self.relations[0].to_publish
+        if self.relation:
+            return self.relation.data[self.charm.model.unit]
+        return {}
 
-    @when("endpoint.{endpoint_name}.joined")
-    def send_instance_info(self):
+
+    def _joined(self, _):
         self._to_publish["instance-id"] = self.instance_id
         self._to_publish["region"] = self.region
 
-    @when("endpoint.{endpoint_name}.changed")
-    def check_ready(self):
-        completed = self._received.get("completed", {})
-        actual_hash = completed.get(self.instance_id)
-        # My middle name is ready. No, that doesn't sound right.
-        # I eat ready for breakfast.
-        toggle_flag(
-            self.expand_name("ready"),
-            self._requested and actual_hash == self._expected_hash,
-        )
-        clear_flag(self.expand_name("changed"))
-
-    @when_not("endpoint.{endpoint_name}.joined")
-    def remove_ready(self):
-        clear_flag(self.expand_name("ready"))
-
     @property
+    def is_ready(self):
+        completed = json.loads(self._received.get("completed", "{}"))
+        response_hash = completed.get(self.instance_id)
+        return response_hash == self._expected_hash
+    
+    def evaluate_relation(self, event) -> Optional[str]:
+        """Determine if relation is ready."""
+        no_relation = not self.relation or (
+            isinstance(event, ops.RelationBrokenEvent) and event.relation is self.relation
+        )
+        if no_relation:
+            return f"Missing required {self.endpoint}"
+        if not self.is_ready:
+            return f"Waiting for {self.endpoint}"
+        return None
+
+    @cached_property
     def instance_id(self):
-        """
-        This unit's instance-id.
-        """
-        if self._instance_id is None:
-            cache_key = self.expand_name("instance-id")
-            cached = unitdata.kv().get(cache_key)
-            if cached:
-                self._instance_id = cached
-            else:
-                req = self._imdv2_request(self._instance_id_url)
-                with urlopen(req) as fd:
-                    self._instance_id = fd.read(READ_BLOCK_SIZE).decode("utf8")
-                unitdata.kv().set(cache_key, self._instance_id)
-        return self._instance_id
+        """This unit's instance-id."""
+        if self._stored.instance_id is None:
+            req = _imdv2_request(_INSTANCE_ID_URL)
+            with urlopen(req) as fd:
+                self._stored.instance_id = fd.read(READ_BLOCK_SIZE).decode("utf8")
+        return self._stored.instance_id
 
-    def _imdv2_request(self, url):
-        token_req = Request(
-            self._metadatav2_token_url,
-            headers={"X-aws-ec2-metadata-token-ttl-seconds": "21600"},
-        )
-        setattr(token_req, "method", "PUT")
-
-        with urlopen(token_req) as fd:
-            token = fd.read(READ_BLOCK_SIZE).decode("utf8")
-            return Request(url, headers={"X-aws-ec2-metadata-token": token})
-
-    @property
+    @cached_property
     def region(self):
-        """
-        The region this unit is in.
-        """
-        if self._region is None:
-            cache_key = self.expand_name("region")
-            cached = unitdata.kv().get(cache_key)
-            if cached:
-                self._region = cached
-            else:
-                req = self._imdv2_request(self._az_url)
-                with urlopen(req) as fd:
-                    az = fd.read(READ_BLOCK_SIZE).decode("utf8")
-                    self._region = az.rstrip(string.ascii_lowercase)
-                unitdata.kv().set(cache_key, self._region)
-        return self._region
+        """The region this unit is in."""
+        if self._stored.region is None:
+            req = _imdv2_request(_AZ_URL)
+            with urlopen(req) as fd:
+                az = fd.read(READ_BLOCK_SIZE).decode("utf8")
+                self._stored.region = az.rstrip(string.ascii_lowercase)
+        return self._stored.region
 
     @property
     def _expected_hash(self):
@@ -162,15 +155,10 @@ class AWSIntegrationRequires(Endpoint):
             json.dumps(dict(self._to_publish), sort_keys=True).encode("utf8")
         ).hexdigest()
 
-    @property
-    def _requested(self):
-        # whether or not a request has been issued
-        return self._to_publish["requested"]
-
     def _request(self, keyvals):
-        self._to_publish.update(keyvals)
-        self._to_publish["requested"] = True
-        clear_flag(self.expand_name("ready"))
+        kwds={key: json.dumps(val) for key,val in keyvals.items()}
+        self._to_publish.update(**kwds)
+        self._to_publish["requested"] = "true"
 
     def tag_instance(self, tags):
         """
