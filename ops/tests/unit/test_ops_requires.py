@@ -89,7 +89,7 @@ def test_is_ready_success(harness, recv_data):
 
 @pytest.mark.parametrize("method_name, args", 
     [
-        ("tag_instance", 'tags={"k8s.io/role/master": "true", "kubernetes.io/cluster/kubernetes-generated-cluster-name": "owned"}'),
+        ("tag_instance", 'tags={"k8s.io/role/control-plane": "true", "kubernetes.io/cluster/kubernetes-generated-cluster-name": "owned"}'),
         ("tag_instance_security_group", 'tags={"kubernetes.io/cluster/kubernetes-generated-cluster-name": "owned"}'),
         ("tag_instance_subnet", 'tags={"kubernetes.io/cluster/kubernetes-generated-cluster-name": "owned"}'),
         ("enable_acm_readonly", None),
