@@ -11,7 +11,8 @@ import logging
 import ops
 import string
 from functools import cached_property
-from typing import  Mapping, Optional
+from typing import Mapping, Optional
+from urllib.error import HTTPError, URLError
 from urllib.parse import urljoin
 from urllib.request import urlopen, Request
 
@@ -29,16 +30,30 @@ _METADATA_URL = "http://169.254.169.254/latest/meta-data/"
 _INSTANCE_ID_URL = urljoin(_METADATA_URL, "instance-id")
 _AZ_URL = urljoin(_METADATA_URL, "placement/availability-zone")
 
-def _imdv2_request(url):
+
+def _metadata(url):
+    """Retrieve instance metadata from AWS.
+    https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instancedata-data-retrieval.html
+    """
     token_req = Request(
         _METADATAV2_TOKEN_URL,
         headers={"X-aws-ec2-metadata-token-ttl-seconds": "21600"},
+        method="PUT",
     )
-    setattr(token_req, "method", "PUT")
+    try:
+        with urlopen(token_req) as fd:
+            token = fd.read(READ_BLOCK_SIZE).decode("utf8")
+            req = Request(url, headers={"X-aws-ec2-metadata-token": token})
+        with urlopen(req) as fd:
+            return fd.read(READ_BLOCK_SIZE).decode("utf8")
+    except (URLError, HTTPError) as e:
+        raise AWSIntegrationError(url, "Failed to get instance metadata") from e
 
-    with urlopen(token_req) as fd:
-        token = fd.read(READ_BLOCK_SIZE).decode("utf8")
-        return Request(url, headers={"X-aws-ec2-metadata-token": token})
+
+class AWSIntegrationError(Exception):
+    def __init__(self, url: str, *args: object) -> None:
+        super().__init__(*args)
+        self.url = url
 
 
 class AWSIntegrationRequires(ops.Object):
@@ -54,7 +69,7 @@ class AWSIntegrationRequires(ops.Object):
             super().__init__(*args)
             self.aws = AwsIntegrationRequires(self)
             ...
-    
+
         def request_aws_integration():
             self.aws.request_instance_tags({
                 'tag1': 'value1',
@@ -74,11 +89,11 @@ class AWSIntegrationRequires(ops.Object):
     def __init__(self, charm: ops.CharmBase, endpoint="aws"):
         super().__init__(charm, f"relation-{endpoint}")
         self.endpoint = endpoint
-        self.charm =charm
-        
+        self.charm = charm
+
         events = charm.on[endpoint]
         self.framework.observe(events.relation_joined, self._joined)
-        self._stored.set_default(instance_id=None,region=None)
+        self._stored.set_default(instance_id=None, region=None)
 
     @property
     def relation(self) -> Optional[ops.Relation]:
@@ -87,7 +102,7 @@ class AWSIntegrationRequires(ops.Object):
         return relations[0] if relations else None
 
     @property
-    def _received(self) -> Mapping[str,str]:
+    def _received(self) -> Mapping[str, str]:
         """
         Helper to streamline access to received data since we expect to only
         ever be connected to a single AWS integration application with a
@@ -108,7 +123,6 @@ class AWSIntegrationRequires(ops.Object):
             return self.relation.data[self.charm.model.unit]
         return {}
 
-
     def _joined(self, _):
         self._to_publish["instance-id"] = self.instance_id
         self._to_publish["region"] = self.region
@@ -118,11 +132,12 @@ class AWSIntegrationRequires(ops.Object):
         completed = json.loads(self._received.get("completed", "{}"))
         response_hash = completed.get(self.instance_id)
         return response_hash == self._expected_hash
-    
+
     def evaluate_relation(self, event) -> Optional[str]:
         """Determine if relation is ready."""
         no_relation = not self.relation or (
-            isinstance(event, ops.RelationBrokenEvent) and event.relation is self.relation
+            isinstance(event, ops.RelationBrokenEvent)
+            and event.relation is self.relation
         )
         if no_relation:
             return f"Missing required {self.endpoint}"
@@ -134,19 +149,15 @@ class AWSIntegrationRequires(ops.Object):
     def instance_id(self):
         """This unit's instance-id."""
         if self._stored.instance_id is None:
-            req = _imdv2_request(_INSTANCE_ID_URL)
-            with urlopen(req) as fd:
-                self._stored.instance_id = fd.read(READ_BLOCK_SIZE).decode("utf8")
+            self._stored.instance_id = _metadata(_INSTANCE_ID_URL)
         return self._stored.instance_id
 
     @cached_property
     def region(self):
         """The region this unit is in."""
         if self._stored.region is None:
-            req = _imdv2_request(_AZ_URL)
-            with urlopen(req) as fd:
-                az = fd.read(READ_BLOCK_SIZE).decode("utf8")
-                self._stored.region = az.rstrip(string.ascii_lowercase)
+            az = _metadata(_AZ_URL)
+            self._stored.region = az.rstrip(string.ascii_lowercase)
         return self._stored.region
 
     @property
@@ -156,7 +167,7 @@ class AWSIntegrationRequires(ops.Object):
         ).hexdigest()
 
     def _request(self, keyvals):
-        kwds={key: json.dumps(val) for key,val in keyvals.items()}
+        kwds = {key: json.dumps(val) for key, val in keyvals.items()}
         self._to_publish.update(**kwds)
         self._to_publish["requested"] = "true"
 
