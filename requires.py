@@ -18,7 +18,6 @@ The flags that are set by the requires side of this interface are:
   are requested.  It should not be removed by the charm.
 """
 
-
 import json
 import string
 from hashlib import sha256
