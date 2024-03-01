@@ -115,7 +115,7 @@ def test_is_ready_success(harness, recv_data):
     [
         (
             "tag_instance",
-            'tags={"k8s.io/role/control-plane": "true", "kubernetes.io/cluster/kubernetes-generated-cluster-name": "owned"}',
+            'tags={"tag1": "true", "tag2": "false"}',
         ),
         (
             "tag_instance_security_group",

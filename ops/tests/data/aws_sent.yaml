@@ -13,7 +13,7 @@ ingress-address: 172.31.39.57
 instance-id: '"i-abcdefghijklmnopq"'
 instance-security-group-tags: '{"kubernetes.io/cluster/kubernetes-generated-cluster-name": "owned"}'
 instance-subnet-tags: '{"kubernetes.io/cluster/kubernetes-generated-cluster-name": "owned"}'
-instance-tags: '{"k8s.io/role/control-plane": "true", "kubernetes.io/cluster/kubernetes-generated-cluster-name": "owned"}'
+instance-tags: '{"tag1": "true", "tag2": "false"}'
 enable-object-storage-management: "true"
 object-storage-management-patterns: '["arn:aws:s3:::auto-prefixed", "arn:aws:s3:::already-prefixed"]'
 enable-object-storage-access: "true"
