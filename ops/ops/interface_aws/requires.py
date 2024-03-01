@@ -70,15 +70,15 @@ class AWSIntegrationRequires(ops.Object):
             self.aws = AwsIntegrationRequires(self)
             ...
 
-        def request_aws_integration():
+        def request_aws_integration(self):
             self.aws.request_instance_tags({
                 'tag1': 'value1',
                 'tag2': None,
             })
-            aws.request_load_balancer_management()
+            self.aws.request_load_balancer_management()
             # ...
 
-        def check_aws_integration():
+        def check_aws_integration(self):
             if self.aws.is_ready():
                 update_config_enable_aws()
         ```
