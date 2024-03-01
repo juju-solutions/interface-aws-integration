@@ -124,6 +124,12 @@ class AWSIntegrationRequires(ops.Object):
         return {}
 
     def _joined(self, _):
+        log.info(
+            "%s is instance=%s in region=%s",
+            self.charm.unit.name,
+            self.instance_id,
+            self.region,
+        )
         self._to_publish["instance-id"] = self.instance_id
         self._to_publish["region"] = self.region
 
